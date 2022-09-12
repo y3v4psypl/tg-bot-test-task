@@ -32,7 +32,8 @@ bot.onText(/\/weather/gm, (msg: Message) => {
 
         const { time, temperature_2m } = weatherData.hourly;
 
-        const weatherIndex = time.findIndex(e => e == currentTime);
+        const weatherIndex = time.findIndex(el => el == currentTime);
+        console.log(currentTime, temperature_2m[weatherIndex]);
 
         await bot.sendMessage(msg.chat.id, `Сейчас в Оттаве (Канада) ${temperature_2m[weatherIndex]}°C`);
     });
