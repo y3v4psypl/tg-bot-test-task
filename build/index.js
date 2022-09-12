@@ -27,11 +27,11 @@ bot.setWebHook('https://atk-group-test-task.herokuapp.com/');
 bot.onText(/\/wannaread/gm, (msg) => {
     const photo = 'https://pythonist.ru/wp-content/uploads/2020/03/photo_2021-02-03_10-47-04-350x2000-1.jpg';
     const caption = 'Идеальный карманный справочник для быстрого ознакомления с особенностями работы разработчиков на Python. Вы найдете море краткой информации о типах и операторах в Python, именах специальных методов, встроенных функциях, исключениях и других часто используемых стандартных модулях.';
-    const file = '../files/karmaniy_spravochnik_po_piton.zip';
+    // const file = '..files/karmaniy_spravochnik_po_piton.zip';
     bot.sendPhoto(msg.chat.id, photo, {
         caption,
     }).catch(e => console.log(e));
-    bot.sendDocument(msg.chat.id, file);
+    // bot.sendDocument(msg.chat.id, file);
 });
 bot.onText(/\/weather/gm, (msg) => {
     const currentTime = new Date().toISOString().slice(0, -10).concat('00');
@@ -44,3 +44,4 @@ bot.onText(/\/weather/gm, (msg) => {
         yield bot.sendMessage(msg.chat.id, `Сейчас в Оттаве (Канада) ${temperature_2m[weatherIndex]}°C`);
     }));
 });
+bot.on('polling_error', console.log);
