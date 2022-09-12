@@ -38,6 +38,8 @@ bot.onText(/\/weather/gm, (msg: Message) => {
     });
 });
 
+bot.on('polling_error', console.log);
+
 interface IWeatherData {
     latitude: number;
     longitude: number;
