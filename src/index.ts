@@ -7,12 +7,15 @@ config();
 let TOKEN = process.env.TELEGRAM_API_TOKEN || 'undefined';
 
 // create bot
-const bot = new TelegramBot(TOKEN, { polling: true })
+const bot = new TelegramBot(TOKEN, { polling: true });
+if (bot) { console.log('Bot is created')};
+
+bot.setWebHook('https://atk-group-test-task.herokuapp.com/');
 
 bot.onText(/\/wannaread/gm, (msg: Message) => {
     const photo = '../files/python-pic.jpg';
     const caption = 'Идеальный карманный справочник для быстрого ознакомления с особенностями работы разработчиков на Python. Вы найдете море краткой информации о типах и операторах в Python, именах специальных методов, встроенных функциях, исключениях и других часто используемых стандартных модулях.';
-    const file = '../files/karmaniy_spravochnik_po_piton.zip'
+    const file = '../files/karmaniy_spravochnik_po_piton.zip';
     bot.sendPhoto(msg.chat.id, photo, {
         caption,
     });
