@@ -1,5 +1,6 @@
 import {config} from 'dotenv';
 import TelegramBot, {Message} from 'node-telegram-bot-api';
+import fetch from 'node-fetch';
 
 // access env variables
 config();
@@ -28,11 +29,12 @@ bot.onText(/\/weather/gm, (msg: Message) => {
 
     const response = fetch(url, { method: 'GET'});
     response.then(async response => {
+        //@ts-ignore
         const weatherData: IWeatherData = await response.json();
 
         const { time, temperature_2m } = weatherData.hourly;
 
-        const weatherIndex = time.findIndex(el => el == currentTime);
+        const weatherIndex = time.findIndex(el => el === currentTime);
         console.log(currentTime, temperature_2m[weatherIndex]);
 
         await bot.sendMessage(msg.chat.id, `Сейчас в Оттаве (Канада) ${temperature_2m[weatherIndex]}°C`);

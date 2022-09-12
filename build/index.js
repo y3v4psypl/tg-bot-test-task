@@ -14,6 +14,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const dotenv_1 = require("dotenv");
 const node_telegram_bot_api_1 = __importDefault(require("node-telegram-bot-api"));
+const node_fetch_1 = __importDefault(require("node-fetch"));
 // access env variables
 (0, dotenv_1.config)();
 let TOKEN = process.env.TELEGRAM_API_TOKEN || 'undefined';
@@ -36,11 +37,12 @@ bot.onText(/\/wannaread/gm, (msg) => {
 bot.onText(/\/weather/gm, (msg) => {
     const currentTime = new Date().toISOString().slice(0, -10).concat('00');
     const url = 'https://api.open-meteo.com/v1/forecast?latitude=45.4235&longitude=-75.6979&hourly=temperature_2m';
-    const response = fetch(url, { method: 'GET' });
+    const response = (0, node_fetch_1.default)(url, { method: 'GET' });
     response.then((response) => __awaiter(void 0, void 0, void 0, function* () {
+        //@ts-ignore
         const weatherData = yield response.json();
         const { time, temperature_2m } = weatherData.hourly;
-        const weatherIndex = time.findIndex(el => el == currentTime);
+        const weatherIndex = time.findIndex(el => el === currentTime);
         console.log(currentTime, temperature_2m[weatherIndex]);
         yield bot.sendMessage(msg.chat.id, `Сейчас в Оттаве (Канада) ${temperature_2m[weatherIndex]}°C`);
     }));
