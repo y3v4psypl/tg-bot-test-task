@@ -30,7 +30,7 @@ bot.onText(/\/wannaread/gm, (msg) => {
     const file = '../files/karmaniy_spravochnik_po_piton.zip';
     bot.sendPhoto(msg.chat.id, photo, {
         caption,
-    });
+    }).catch(e => console.log(e));
     bot.sendDocument(msg.chat.id, file);
 });
 bot.onText(/\/weather/gm, (msg) => {
