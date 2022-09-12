@@ -25,14 +25,17 @@ if (bot) {
 }
 ;
 bot.setWebHook('https://atk-group-test-task.herokuapp.com/');
+bot.onText(/\/start/gm, (msg) => {
+    bot.sendMessage(msg.chat.id, 'Здравствуйте. Нажмите на любую интересующую Вас кнопку');
+});
 bot.onText(/\/wannaread/gm, (msg) => {
     const photo = 'https://pythonist.ru/wp-content/uploads/2020/03/photo_2021-02-03_10-47-04-350x2000-1.jpg';
     const caption = 'Идеальный карманный справочник для быстрого ознакомления с особенностями работы разработчиков на Python. Вы найдете море краткой информации о типах и операторах в Python, именах специальных методов, встроенных функциях, исключениях и других часто используемых стандартных модулях.';
-    const file = '/files/karmaniy_spravochnik_po_piton.zip';
+    const file = '../files/karmaniy_spravochnik_po_piton.zip';
     bot.sendPhoto(msg.chat.id, photo, {
         caption,
     }).catch(e => console.log(e));
-    bot.sendDocument(msg.chat.id, file);
+    bot.sendDocument(msg.chat.id, file).catch(e => console.log(e));
 });
 bot.onText(/\/weather/gm, (msg) => __awaiter(void 0, void 0, void 0, function* () {
     const currentTime = new Date().toISOString().slice(0, -10).concat('00');
