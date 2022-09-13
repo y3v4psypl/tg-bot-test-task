@@ -61,6 +61,7 @@ bot.onText(/\/start/gm, async (msg: Message) => {
 
     bot.on('callback_query', async (callback_query) => {
         const action = callback_query.data;
+        console.log(callback_query.data, callback_query.id)
 
         if (action === 'weather') {
             const currentTime = new Date().toISOString().slice(0, -10).concat('00');
@@ -78,7 +79,7 @@ bot.onText(/\/start/gm, async (msg: Message) => {
 
             await bot.answerCallbackQuery(callback_query.id)
                 .then(() => bot.sendMessage(msg.chat.id, `Сейчас в Оттаве (Канада) ${temperature_2m[weatherIndex]}°C`));
-            console.log(callback_query.data, callback_query.id)
+
 
         }
     })
