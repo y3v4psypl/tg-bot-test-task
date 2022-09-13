@@ -22,12 +22,13 @@ console.log(client ? "Postgres is connected" : "Postgres connection failed");
 
 // create bot
 const bot = new TelegramBot(TOKEN, { polling: true });
-if (bot) { console.log('Bot is created')};
+if (bot) { console.log('Bot is created') };
 
 bot.setWebHook('https://atk-group-test-task.herokuapp.com/');
 
 bot.onText(/\/start/gm, (msg: Message) => {
     bot.sendMessage(msg.chat.id, 'Здравствуйте. Нажмите на любую интересующую Вас кнопку');
+    console.log(msg.chat.id);
 })
 
 bot.onText(/\/wannaread/gm, (msg: Message) => {
