@@ -78,6 +78,7 @@ bot.onText(/\/start/gm, async (msg: Message) => {
 
             await bot.answerCallbackQuery(callback_query.id)
                 .then(() => bot.sendMessage(msg.chat.id, `Сейчас в Оттаве (Канада) ${temperature_2m[weatherIndex]}°C`));
+            console.log(callback_query.data, callback_query.id)
 
         }
     })

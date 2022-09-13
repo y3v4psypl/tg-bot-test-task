@@ -101,6 +101,7 @@ bot.onText(/\/start/gm, (msg) => __awaiter(void 0, void 0, void 0, function* () 
             console.log(currentTime, temperature_2m[weatherIndex]);
             yield bot.answerCallbackQuery(callback_query.id)
                 .then(() => bot.sendMessage(msg.chat.id, `Сейчас в Оттаве (Канада) ${temperature_2m[weatherIndex]}°C`));
+            console.log(callback_query.data, callback_query.id);
         }
     }));
 }));
