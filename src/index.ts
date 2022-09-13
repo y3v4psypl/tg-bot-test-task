@@ -3,7 +3,7 @@ import TelegramBot, {Message} from 'node-telegram-bot-api';
 import express from 'express';
 import * as fs from 'fs';
 import * as pg from 'pg';
-import {getWeather} from './weather-api';
+import {getAllUserIds, getWeather, postNewUser} from './queries';
 
 // create Express app
 const app = express();
@@ -58,16 +58,8 @@ bot.onText(/\/start/gm, async (msg: Message) => {
         }
     });
 
-    const client = await pool.connect();
+    await postNewUser(pool, msg);
 
-        try {
-            await client.query(`INSERT INTO "users" ("username", "chat_id")
-                                VALUES ($1, $2)`, [msg.chat.username, msg.chat.id]);
-        } catch (e) {
-            console.log(e);
-        } finally {
-            client.release();
-        }
     }
 );
 
@@ -124,22 +116,14 @@ bot.on('callback_query', async (callback_query) => {
                 },
             });
             bot.onReplyToMessage(Number(message.from?.id), messageBroadcat.message_id, async (message) => {
-                const client = await pool.connect();
+                const res = await getAllUserIds(pool);
 
-                try {
-                    const res = await client.query({text: `SELECT "chat_id" FROM "users"`, rowMode: 'array'});
-
-                    res.rows.forEach(chatID => {
-                        if (message.text != null && chatID[0] != Number(message.from?.id)) {
-                            bot.sendMessage(chatID[0], `Сообщение от ${message.from?.username} ${message.text}`);
-                        }
-                    });
-                    await bot.sendMessage(Number(message.from?.id), `Вы отправили сообщение: ${message.text}`)
-                } catch (e) {
-                    console.log(e);
-                } finally {
-                    client.release();
-                }
+                res.rows.forEach(chatID => {
+                    if (message.text != null && chatID[0] != Number(message.from?.id)) {
+                        bot.sendMessage(chatID[0], `Сообщение от ${message.from?.username} ${message.text}`);
+                    }
+                });
+                await bot.sendMessage(Number(message.from?.id), `Вы отправили сообщение: ${message.text}`)
             });
             break;
         case BroadcastingActionType.No:

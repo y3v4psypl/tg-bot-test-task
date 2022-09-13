@@ -40,7 +40,7 @@ const node_telegram_bot_api_1 = __importDefault(require("node-telegram-bot-api")
 const express_1 = __importDefault(require("express"));
 const fs = __importStar(require("fs"));
 const pg = __importStar(require("pg"));
-const weather_api_1 = require("./weather-api");
+const queries_1 = require("./queries");
 // create Express app
 const app = (0, express_1.default)();
 // access env variables
@@ -90,17 +90,7 @@ bot.onText(/\/start/gm, (msg) => __awaiter(void 0, void 0, void 0, function* () 
             ],
         }
     });
-    const client = yield pool.connect();
-    try {
-        yield client.query(`INSERT INTO "users" ("username", "chat_id")
-                                VALUES ($1, $2)`, [msg.chat.username, msg.chat.id]);
-    }
-    catch (e) {
-        console.log(e);
-    }
-    finally {
-        client.release();
-    }
+    yield (0, queries_1.postNewUser)(pool, msg);
 }));
 bot.on('callback_query', (callback_query) => __awaiter(void 0, void 0, void 0, function* () {
     var _b, _c, _d, _e;
@@ -110,7 +100,7 @@ bot.on('callback_query', (callback_query) => __awaiter(void 0, void 0, void 0, f
         case StartActionType.GetWeather:
             if (((_b = message.from) === null || _b === void 0 ? void 0 : _b.id) != null) {
                 yield bot.answerCallbackQuery(callback_query.id);
-                yield bot.sendMessage((_c = message.from) === null || _c === void 0 ? void 0 : _c.id, `Сейчас в Оттаве (Канада) ${yield (0, weather_api_1.getWeather)()}°C`);
+                yield bot.sendMessage((_c = message.from) === null || _c === void 0 ? void 0 : _c.id, `Сейчас в Оттаве (Канада) ${yield (0, queries_1.getWeather)()}°C`);
             }
             break;
         case StartActionType.PythonHandbook:
@@ -154,23 +144,14 @@ bot.on('callback_query', (callback_query) => __awaiter(void 0, void 0, void 0, f
             });
             bot.onReplyToMessage(Number((_g = message.from) === null || _g === void 0 ? void 0 : _g.id), messageBroadcat.message_id, (message) => __awaiter(void 0, void 0, void 0, function* () {
                 var _j;
-                const client = yield pool.connect();
-                try {
-                    const res = yield client.query({ text: `SELECT "chat_id" FROM "users"`, rowMode: 'array' });
-                    res.rows.forEach(chatID => {
-                        var _a, _b;
-                        if (message.text != null && chatID[0] != Number((_a = message.from) === null || _a === void 0 ? void 0 : _a.id)) {
-                            bot.sendMessage(chatID[0], `Сообщение от ${(_b = message.from) === null || _b === void 0 ? void 0 : _b.username} ${message.text}`);
-                        }
-                    });
-                    yield bot.sendMessage(Number((_j = message.from) === null || _j === void 0 ? void 0 : _j.id), `Вы отправили сообщение: ${message.text}`);
-                }
-                catch (e) {
-                    console.log(e);
-                }
-                finally {
-                    client.release();
-                }
+                const res = yield (0, queries_1.getAllUserIds)(pool);
+                res.rows.forEach(chatID => {
+                    var _a, _b;
+                    if (message.text != null && chatID[0] != Number((_a = message.from) === null || _a === void 0 ? void 0 : _a.id)) {
+                        bot.sendMessage(chatID[0], `Сообщение от ${(_b = message.from) === null || _b === void 0 ? void 0 : _b.username} ${message.text}`);
+                    }
+                });
+                yield bot.sendMessage(Number((_j = message.from) === null || _j === void 0 ? void 0 : _j.id), `Вы отправили сообщение: ${message.text}`);
             }));
             break;
         case BroadcastingActionType.No:
