@@ -75,9 +75,7 @@ bot.onText(/\/start/gm, (msg) => __awaiter(void 0, void 0, void 0, function* () 
     catch (error) {
         console.log(error);
     }
-    finally {
-        yield client.end();
-    }
+    return yield client.end();
 }));
 bot.onText(/\/wannaread/gm, (msg) => {
     const photo = 'https://pythonist.ru/wp-content/uploads/2020/03/photo_2021-02-03_10-47-04-350x2000-1.jpg';

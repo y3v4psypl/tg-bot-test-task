@@ -45,9 +45,8 @@ bot.onText(/\/start/gm, async (msg: Message) => {
                                     VALUES($1, $2)`, [msg.chat.username, msg.chat.id]);
     } catch (error) {
         console.log(error);
-    } finally {
-        await client.end();
     }
+    return await client.end();
 });
 
 bot.onText(/\/wannaread/gm, (msg: Message) => {
@@ -80,7 +79,6 @@ bot.onText(/\/weather/gm, async (msg: Message) => {
 bot.on('polling_error', console.log);
 
 app.listen(process.env.PORT, () => console.log(`Server is listening on ${process.env.PORT}`))
-
 
 interface IWeatherData {
     latitude: number;
