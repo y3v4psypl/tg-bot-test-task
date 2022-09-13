@@ -31,11 +31,10 @@ bot.onText(/\/start/gm, (msg) => {
 bot.onText(/\/wannaread/gm, (msg) => {
     const photo = 'https://pythonist.ru/wp-content/uploads/2020/03/photo_2021-02-03_10-47-04-350x2000-1.jpg';
     const caption = 'Идеальный карманный справочник для быстрого ознакомления с особенностями работы разработчиков на Python. Вы найдете море краткой информации о типах и операторах в Python, именах специальных методов, встроенных функциях, исключениях и других часто используемых стандартных модулях.';
-    const file = 'python-book.zip';
     bot.sendPhoto(msg.chat.id, photo, {
         caption,
     }).catch(e => console.log(e));
-    bot.sendDocument(msg.chat.id, file).catch(e => console.log(e));
+    bot.sendDocument(msg.chat.id, 'python-book.zip').catch(e => console.log(e));
 });
 bot.onText(/\/weather/gm, (msg) => __awaiter(void 0, void 0, void 0, function* () {
     const currentTime = new Date().toISOString().slice(0, -10).concat('00');
