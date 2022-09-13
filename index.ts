@@ -1,11 +1,11 @@
 import {config} from 'dotenv';
-import TelegramBot, {Message} from 'node-telegram-bot-api';
+import TelegramBot, {Message, SendMessageOptions} from 'node-telegram-bot-api';
 import axios from 'axios';
 import express from 'express';
 import * as fs from 'fs';
 import * as pg from 'pg';
 
-
+// create Express app
 const app = express();
 
 // access env variables
@@ -25,17 +25,23 @@ const pool = new pg.Pool({
     }
 });
 
-
-// console.log(client ? "Postgres is connected" : "Postgres connection failed");
-
 // create bot
 const bot = new TelegramBot(TOKEN, { polling: true });
-if (bot) { console.log('Bot is created') };
+if (bot) { console.log('Bot is running') }
 
-// bot.setWebHook('https://atk-group-test-task.herokuapp.com/');
+const options: SendMessageOptions = {
+    //@ts-ignore
+    reply_markup: JSON.stringify({
+        inline_keyboard: [
+            [{text: 'Погода в Канаде', callback_data: 'weather'}],
+            [{text: 'Хочу почитать!', callback_data: 'wantToRead'}],
+            [{text: 'Сделать рассылку', callback_data: 'mailing'}]
+        ]
+    })
+}
 
 bot.onText(/\/start/gm, async (msg: Message) => {
-    bot.sendMessage(msg.chat.id, 'Здравствуйте. Нажмите на любую интересующую Вас кнопку');
+    bot.sendMessage(msg.chat.id, 'Здравствуйте. Нажмите на любую интересующую Вас кнопку', options);
     console.log(msg.chat.id);
 
     pool.connect((err, client, done) => {
@@ -52,22 +58,29 @@ bot.onText(/\/start/gm, async (msg: Message) => {
             }
         });
     });
+    bot.on('callback_query', (callback_query) => {
+
+    })
 });
 
 bot.onText(/\/wannaread/gm, (msg: Message) => {
     const photo = 'https://pythonist.ru/wp-content/uploads/2020/03/photo_2021-02-03_10-47-04-350x2000-1.jpg';
     const caption = 'Идеальный карманный справочник для быстрого ознакомления с особенностями работы разработчиков на Python. Вы найдете море краткой информации о типах и операторах в Python, именах специальных методов, встроенных функциях, исключениях и других часто используемых стандартных модулях.';
     const file = fs.createReadStream('files/python-book.zip')
+
     bot.sendPhoto(msg.chat.id, photo, {
         caption,
-    }).catch(e => console.log(e))
+    }).catch(e => console.log(e));
+
     bot.sendDocument(msg.chat.id, file).catch(e => console.log(e));
+
     console.log('File has been sent')
 });
 
 bot.onText(/\/weather/gm, async (msg: Message) => {
     const currentTime = new Date().toISOString().slice(0, -10).concat('00');
     const url = 'https://api.open-meteo.com/v1/forecast?latitude=45.4235&longitude=-75.6979&hourly=temperature_2m';
+
     let weatherData: IWeatherData = await axios({
         method: 'GET',
         url: url,
@@ -80,6 +93,8 @@ bot.onText(/\/weather/gm, async (msg: Message) => {
 
     bot.sendMessage(msg.chat.id, `Сейчас в Оттаве (Канада) ${temperature_2m[weatherIndex]}°C`);
 });
+
+bot.on
 
 bot.on('polling_error', console.log);
 
@@ -103,8 +118,4 @@ interface IWeatherData {
     };
 
 }
-
-
-
-
 

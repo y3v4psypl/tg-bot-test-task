@@ -41,6 +41,7 @@ const axios_1 = __importDefault(require("axios"));
 const express_1 = __importDefault(require("express"));
 const fs = __importStar(require("fs"));
 const pg = __importStar(require("pg"));
+// create Express app
 const app = (0, express_1.default)();
 // access env variables
 (0, dotenv_1.config)();
@@ -56,16 +57,23 @@ const pool = new pg.Pool({
         rejectUnauthorized: false
     }
 });
-// console.log(client ? "Postgres is connected" : "Postgres connection failed");
 // create bot
 const bot = new node_telegram_bot_api_1.default(TOKEN, { polling: true });
 if (bot) {
-    console.log('Bot is created');
+    console.log('Bot is running');
 }
-;
-// bot.setWebHook('https://atk-group-test-task.herokuapp.com/');
+const options = {
+    //@ts-ignore
+    reply_markup: JSON.stringify({
+        inline_keyboard: [
+            [{ text: 'Погода в Канаде', callback_data: 'weather' }],
+            [{ text: 'Хочу почитать!', callback_data: 'wantToRead' }],
+            [{ text: 'Сделать рассылку', callback_data: 'mailing' }]
+        ]
+    })
+};
 bot.onText(/\/start/gm, (msg) => __awaiter(void 0, void 0, void 0, function* () {
-    bot.sendMessage(msg.chat.id, 'Здравствуйте. Нажмите на любую интересующую Вас кнопку');
+    bot.sendMessage(msg.chat.id, 'Здравствуйте. Нажмите на любую интересующую Вас кнопку', options);
     console.log(msg.chat.id);
     pool.connect((err, client, done) => {
         if (err) {
@@ -78,6 +86,8 @@ bot.onText(/\/start/gm, (msg) => __awaiter(void 0, void 0, void 0, function* () 
                 return console.log('Error running query', e);
             }
         });
+    });
+    bot.on('callback_query', (callback_query) => {
     });
 }));
 bot.onText(/\/wannaread/gm, (msg) => {
@@ -102,5 +112,6 @@ bot.onText(/\/weather/gm, (msg) => __awaiter(void 0, void 0, void 0, function* (
     console.log(currentTime, temperature_2m[weatherIndex]);
     bot.sendMessage(msg.chat.id, `Сейчас в Оттаве (Канада) ${temperature_2m[weatherIndex]}°C`);
 }));
+bot.on;
 bot.on('polling_error', console.log);
 app.listen(process.env.PORT, () => console.log(`Server is listening on ${process.env.PORT}`));
