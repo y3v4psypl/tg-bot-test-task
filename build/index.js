@@ -44,14 +44,16 @@ const pg = __importStar(require("pg"));
 (0, dotenv_1.config)();
 let TOKEN = process.env.TELEGRAM_API_TOKEN || 'undefined';
 // postgres
-const connectionString = `postgresql://${process.env.PG_USER}:${process.env.PG_PASSWORD}@${process.env.PG_HOST}:${process.env.PG_PORT}/${process.env.PG_DATABASE}`;
 const client = new pg.Client({
-    connectionString: connectionString,
+    host: process.env.PG_HOST,
+    user: process.env.PG_USER,
+    database: process.env.PG_DATABASE,
+    password: process.env.PG_PASSWORD,
+    port: Number(process.env.PG_PORT),
     ssl: {
         rejectUnauthorized: false
     }
 });
-client.connect().catch(e => console.log(e));
 console.log(client ? "Postgres is connected" : "Postgres connection failed");
 // create bot
 const bot = new node_telegram_bot_api_1.default(TOKEN, { polling: true });
@@ -60,16 +62,21 @@ if (bot) {
 }
 ;
 bot.setWebHook('https://atk-group-test-task.herokuapp.com/');
-bot.onText(/\/start/gm, (msg) => {
+bot.onText(/\/start/gm, (msg) => __awaiter(void 0, void 0, void 0, function* () {
     bot.sendMessage(msg.chat.id, 'Здравствуйте. Нажмите на любую интересующую Вас кнопку');
     console.log(msg.chat.id);
-    client.query(`INSERT INTO "users"(username, chat_id) 
-                                    VALUES(${msg.chat.username}, ${msg.chat.id});`, (err) => {
-        if (err)
-            throw err;
-        client.end();
-    });
-});
+    try {
+        yield client.connect();
+        yield client.query(`INSERT INTO "users" ("username", "chat_id") 
+                                    VALUES($1, $2)`, [msg.chat.username, msg.chat.id]);
+    }
+    catch (error) {
+        console.log(error);
+    }
+    finally {
+        yield client.end();
+    }
+}));
 bot.onText(/\/wannaread/gm, (msg) => {
     const photo = 'https://pythonist.ru/wp-content/uploads/2020/03/photo_2021-02-03_10-47-04-350x2000-1.jpg';
     const caption = 'Идеальный карманный справочник для быстрого ознакомления с особенностями работы разработчиков на Python. Вы найдете море краткой информации о типах и операторах в Python, именах специальных методов, встроенных функциях, исключениях и других часто используемых стандартных модулях.';

@@ -10,14 +10,18 @@ config();
 let TOKEN = process.env.TELEGRAM_API_TOKEN || 'undefined';
 
 // postgres
-const connectionString = `postgresql://${process.env.PG_USER}:${process.env.PG_PASSWORD}@${process.env.PG_HOST}:${process.env.PG_PORT}/${process.env.PG_DATABASE}`;
+
 const client = new pg.Client({
-    connectionString: connectionString,
+    host: process.env.PG_HOST,
+    user: process.env.PG_USER,
+    database: process.env.PG_DATABASE,
+    password: process.env.PG_PASSWORD,
+    port: Number(process.env.PG_PORT),
     ssl: {
     rejectUnauthorized: false
     }
 });
-client.connect().catch(e => console.log(e));
+
 
 console.log(client ? "Postgres is connected" : "Postgres connection failed");
 
@@ -27,16 +31,20 @@ if (bot) { console.log('Bot is created') };
 
 bot.setWebHook('https://atk-group-test-task.herokuapp.com/');
 
-bot.onText(/\/start/gm, (msg: Message) => {
+bot.onText(/\/start/gm, async (msg: Message) => {
     bot.sendMessage(msg.chat.id, 'Здравствуйте. Нажмите на любую интересующую Вас кнопку');
     console.log(msg.chat.id);
+    try {
+        await client.connect();
+        await client.query(`INSERT INTO "users" ("username", "chat_id") 
+                                    VALUES($1, $2)`, [msg.chat.username, msg.chat.id]);
+    } catch (error) {
+        console.log(error);
+    } finally {
+        await client.end();
+    }
 
-    client.query(`INSERT INTO "users"(username, chat_id) 
-                                    VALUES(${msg.chat.username}, ${msg.chat.id});`,
-        (err) => {
-        if (err) throw err;
-        client.end();
-    });
+
 
 });
 
