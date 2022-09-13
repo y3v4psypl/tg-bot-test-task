@@ -31,7 +31,7 @@ bot.onText(/\/start/gm, (msg: Message) => {
     bot.sendMessage(msg.chat.id, 'Здравствуйте. Нажмите на любую интересующую Вас кнопку');
     console.log(msg.chat.id);
 
-    client.query(`INSERT INTO users(username, chat_id) 
+    client.query(`INSERT INTO "users"(username, chat_id) 
                                     VALUES(${msg.chat.username}, ${msg.chat.id});`,
         (err) => {
         if (err) throw err;
