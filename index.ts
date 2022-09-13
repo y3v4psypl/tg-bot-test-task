@@ -32,14 +32,29 @@ if (bot) { console.log('Bot is running') }
 
 bot.onText(/\/start/gm, async (msg: Message) => {
     bot.sendMessage(msg.chat.id, 'Здравствуйте. Нажмите на любую интересующую Вас кнопку', {
-        reply_markup:
-        {
-            //@ts-ignore
-            keyboard: [['Погода в Канаде'], ['Хочу почитать!'], ['Сделать рассылку']]
+        "reply_markup": {
+            "inline_keyboard": [
+                [
+                    {
+                        text: 'Погода в Канаде',
+                        callback_data: '1',
+                    },
+                ],
+                [
+                    {
+                        text: 'Хочу почитать!',
+                        callback_data: '2',
+                    }
+                ],
+                [
+                    {
+                        text: 'Сделать рассылку',
+                        callback_data: '3',
+                    }
+                ]
+            ],
         }
-
     });
-
     console.log(msg.chat.id);
 
     pool.connect((err, client, done) => {
@@ -77,31 +92,55 @@ bot.onText(/\/start/gm, async (msg: Message) => {
 
             await bot.answerCallbackQuery(callback_query.id)
                 .then(() => bot.sendMessage(msg.chat.id, `Сейчас в Оттаве (Канада) ${temperature_2m[weatherIndex]}°C`));
+        }
+        if (action === '2') {
+            const photo = 'https://pythonist.ru/wp-content/uploads/2020/03/photo_2021-02-03_10-47-04-350x2000-1.jpg';
+            const caption = 'Идеальный карманный справочник для быстрого ознакомления с особенностями работы разработчиков на Python. Вы найдете море краткой информации о типах и операторах в Python, именах специальных методов, встроенных функциях, исключениях и других часто используемых стандартных модулях.';
+            const file = fs.createReadStream('files/python-book.zip')
 
+            await bot.answerCallbackQuery(callback_query.id)
+                .then(() => {
+                    bot.sendPhoto(msg.chat.id, photo, {
+                        caption,
+                    }).catch(e => console.log(e));
 
+                    bot.sendDocument(msg.chat.id, file).catch(e => console.log(e));
+
+                    console.log('File has been sent')
+                })
+        }
+        if (action === '3') {
+            await bot.answerCallbackQuery(callback_query.id)
+                .then(() => {
+                    bot.sendMessage(msg.chat.id, 'Вы выбрали рассылку всем пользователям. Вы уверены что хотите это сделать?', {
+                        "reply_markup": {
+                            "inline_keyboard": [
+                                [
+                                    {text: 'Уверен(а)', callback_data: '4'}
+                                ],
+                                [
+                                    {text: 'Нет', callback_data: '5'}
+                                ]
+                            ]
+                        }
+                    })
+
+                    bot.on('callback_query', (callback_query) => {
+                        const action = callback_query.data;
+
+                        if (action === '4') {
+                            bot.answerCallbackQuery(callback_query.id)
+                                .then(() => {
+                                    bot.sendMessage(msg.chat.id, 'Введите сообщение, которое хотите отправить всем пользователям.')
+                                })
+                        }
+                    })
+                })
         }
     })
 });
 
-bot.onText(/\/wannaread/gm, (msg: Message) => {
-    const photo = 'https://pythonist.ru/wp-content/uploads/2020/03/photo_2021-02-03_10-47-04-350x2000-1.jpg';
-    const caption = 'Идеальный карманный справочник для быстрого ознакомления с особенностями работы разработчиков на Python. Вы найдете море краткой информации о типах и операторах в Python, именах специальных методов, встроенных функциях, исключениях и других часто используемых стандартных модулях.';
-    const file = fs.createReadStream('files/python-book.zip')
 
-    bot.sendPhoto(msg.chat.id, photo, {
-        caption,
-    }).catch(e => console.log(e));
-
-    bot.sendDocument(msg.chat.id, file).catch(e => console.log(e));
-
-    console.log('File has been sent')
-});
-
-// bot.onText(/\/weather/gm, async (msg: Message) => {
-//
-// });
-
-bot.on
 
 bot.on('polling_error', console.log);
 
@@ -123,6 +162,4 @@ interface IWeatherData {
         time: string[];
         temperature_2m: number[];
     };
-
 }
-
