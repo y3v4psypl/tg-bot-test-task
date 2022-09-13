@@ -56,7 +56,8 @@ const client = new pg.Client({
         rejectUnauthorized: false
     }
 });
-console.log(client ? "Postgres is connected" : "Postgres connection failed");
+const pool = new pg.Pool();
+// console.log(client ? "Postgres is connected" : "Postgres connection failed");
 // create bot
 const bot = new node_telegram_bot_api_1.default(TOKEN, { polling: true });
 if (bot) {
@@ -67,15 +68,18 @@ if (bot) {
 bot.onText(/\/start/gm, (msg) => __awaiter(void 0, void 0, void 0, function* () {
     bot.sendMessage(msg.chat.id, 'Здравствуйте. Нажмите на любую интересующую Вас кнопку');
     console.log(msg.chat.id);
-    try {
-        yield client.connect();
-        yield client.query(`INSERT INTO "users" ("username", "chat_id") 
-                                    VALUES($1, $2)`, [msg.chat.username, msg.chat.id]);
-    }
-    catch (error) {
-        console.log(error);
-    }
-    return yield client.end();
+    pool.connect((err, client, done) => {
+        if (err) {
+            return console.log('Connection error', err);
+        }
+        client.query(`INSERT INTO "users" ("username", "chat_id")
+                                VALUES ($1, $2)`, [msg.chat.username, msg.chat.id], (e) => {
+            done();
+            if (e) {
+                return console.log('Error running query', e);
+            }
+        });
+    });
 }));
 bot.onText(/\/wannaread/gm, (msg) => {
     const photo = 'https://pythonist.ru/wp-content/uploads/2020/03/photo_2021-02-03_10-47-04-350x2000-1.jpg';

@@ -8,7 +8,6 @@ import * as pg from 'pg';
 
 const app = express();
 
-
 // access env variables
 config();
 
@@ -26,9 +25,10 @@ const client = new pg.Client({
     rejectUnauthorized: false
     }
 });
+const pool = new pg.Pool();
 
 
-console.log(client ? "Postgres is connected" : "Postgres connection failed");
+// console.log(client ? "Postgres is connected" : "Postgres connection failed");
 
 // create bot
 const bot = new TelegramBot(TOKEN, { polling: true });
@@ -39,14 +39,21 @@ if (bot) { console.log('Bot is created') };
 bot.onText(/\/start/gm, async (msg: Message) => {
     bot.sendMessage(msg.chat.id, 'Здравствуйте. Нажмите на любую интересующую Вас кнопку');
     console.log(msg.chat.id);
-    try {
-        await client.connect();
-        await client.query(`INSERT INTO "users" ("username", "chat_id") 
-                                    VALUES($1, $2)`, [msg.chat.username, msg.chat.id]);
-    } catch (error) {
-        console.log(error);
-    }
-    return await client.end();
+
+    pool.connect((err, client, done) => {
+        if (err) {
+            return console.log('Connection error', err);
+        }
+
+        client.query(`INSERT INTO "users" ("username", "chat_id")
+                                VALUES ($1, $2)`, [msg.chat.username, msg.chat.id], (e) => {
+            done();
+
+            if (e) {
+                return console.log('Error running query', e);
+            }
+        });
+    });
 });
 
 bot.onText(/\/wannaread/gm, (msg: Message) => {
