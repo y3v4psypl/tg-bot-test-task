@@ -6,8 +6,8 @@ import * as fs from 'fs';
 import * as pg from 'pg';
 
 
-// const app = express();
-// const server = http.createServer()
+const app = express();
+
 
 // access env variables
 config();
@@ -79,6 +79,7 @@ bot.onText(/\/weather/gm, async (msg: Message) => {
 
 bot.on('polling_error', console.log);
 
+app.listen(process.env.PORT, () => console.log(`Server is listening on ${process.env.PORT}`))
 
 
 interface IWeatherData {

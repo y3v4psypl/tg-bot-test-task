@@ -38,10 +38,10 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const dotenv_1 = require("dotenv");
 const node_telegram_bot_api_1 = __importDefault(require("node-telegram-bot-api"));
 const axios_1 = __importDefault(require("axios"));
+const express_1 = __importDefault(require("express"));
 const fs = __importStar(require("fs"));
 const pg = __importStar(require("pg"));
-// const app = express();
-// const server = http.createServer()
+const app = (0, express_1.default)();
 // access env variables
 (0, dotenv_1.config)();
 let TOKEN = process.env.TELEGRAM_API_TOKEN || 'undefined';
@@ -102,3 +102,4 @@ bot.onText(/\/weather/gm, (msg) => __awaiter(void 0, void 0, void 0, function* (
     bot.sendMessage(msg.chat.id, `Сейчас в Оттаве (Канада) ${temperature_2m[weatherIndex]}°C`);
 }));
 bot.on('polling_error', console.log);
+app.listen(process.env.PORT, () => console.log(`Server is listening on ${process.env.PORT}`));
