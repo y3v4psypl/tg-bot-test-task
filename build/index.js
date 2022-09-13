@@ -146,9 +146,11 @@ bot.on('callback_query', (callback_query) => __awaiter(void 0, void 0, void 0, f
                 var _j;
                 const res = yield (0, queries_1.getAllUserIds)(pool);
                 res.rows.forEach(chatID => {
-                    var _a, _b;
+                    var _a, _b, _c;
                     if (message.text != null && chatID[0] != Number((_a = message.from) === null || _a === void 0 ? void 0 : _a.id)) {
-                        bot.sendMessage(chatID[0], `Сообщение от ${(_b = message.from) === null || _b === void 0 ? void 0 : _b.username} ${message.text}`);
+                        bot.sendMessage(chatID[0], ((_b = message.from) === null || _b === void 0 ? void 0 : _b.username) == undefined
+                            ? `Анонимное сообщение: ${message.text}`
+                            : `Сообщение от ${(_c = message.from) === null || _c === void 0 ? void 0 : _c.username} ${message.text}`);
                     }
                 });
                 yield bot.sendMessage(Number((_j = message.from) === null || _j === void 0 ? void 0 : _j.id), `Вы отправили сообщение: ${message.text}`);
