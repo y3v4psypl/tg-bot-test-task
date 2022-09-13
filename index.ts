@@ -1,5 +1,5 @@
 import {config} from 'dotenv';
-import TelegramBot, {Message, SendMessageOptions} from 'node-telegram-bot-api';
+import TelegramBot, {ChatId, Message, SendMessageOptions} from 'node-telegram-bot-api';
 import axios from 'axios';
 import express, {raw} from 'express';
 import * as fs from 'fs';
@@ -55,7 +55,6 @@ bot.onText(/\/start/gm, async (msg: Message) => {
             ],
         }
     });
-    console.log(msg.chat.id);
 
     pool.connect((err, client, done) => {
         if (err) {
@@ -90,25 +89,25 @@ bot.onText(/\/start/gm, async (msg: Message) => {
             const weatherIndex = time.findIndex(el => el === currentTime);
             console.log(currentTime, temperature_2m[weatherIndex]);
 
-            await bot.answerCallbackQuery(callback_query.id)
-                .then(() => bot.sendMessage(msg.chat.id, `Сейчас в Оттаве (Канада) ${temperature_2m[weatherIndex]}°C`));
+            if (msg.from?.id != null) {
+                await bot.answerCallbackQuery(callback_query.id)
+                await bot.sendMessage(msg.from?.id, `Сейчас в Оттаве (Канада) ${temperature_2m[weatherIndex]}°C`);
+            }
         }
+
         if (action === '2') {
             const photo = 'https://pythonist.ru/wp-content/uploads/2020/03/photo_2021-02-03_10-47-04-350x2000-1.jpg';
             const caption = 'Идеальный карманный справочник для быстрого ознакомления с особенностями работы разработчиков на Python. Вы найдете море краткой информации о типах и операторах в Python, именах специальных методов, встроенных функциях, исключениях и других часто используемых стандартных модулях.';
-            const file = fs.createReadStream('files/python-book.zip')
+            const file = fs.createReadStream('files/python-book.zip');
 
-            await bot.answerCallbackQuery(callback_query.id)
-                .then(() => {
-                    bot.sendPhoto(msg.chat.id, photo, {
-                        caption,
-                    }).catch(e => console.log(e));
-
-                    bot.sendDocument(msg.chat.id, file).catch(e => console.log(e));
-
-                    console.log('File has been sent')
-                })
+            if (msg.from?.id != null) {
+                await bot.answerCallbackQuery(callback_query.id)
+                await bot.sendPhoto(msg.from.id, photo, {caption});
+                await bot.sendDocument(msg.from.id, file).catch(e => console.log(e));
+                console.log('File has been sent');
+            }
         }
+
         if (action === '3') {
             await bot.answerCallbackQuery(callback_query.id)
                 .then(() => {
@@ -137,9 +136,26 @@ bot.onText(/\/start/gm, async (msg: Message) => {
                                         },
                                     });
                                     bot.onReplyToMessage(msg.chat.id, messageBroadcat.message_id, async (message) => {
-                                        if (message.text) {
-                                            await bot.sendMessage(msg.chat.id, message.text)
-                                        }
+                                            pool.connect((err, client, done) => {
+                                                if (err) {
+                                                    return console.log('Connection error', err);
+                                                }
+
+                                                client.query({text: `SELECT "chat_id" FROM "users"`, rowMode: 'array'}, (e, res) => {
+                                                    done();
+                                                    console.log(res.rows);
+                                                    // res.rows.forEach(chatID => {
+                                                    //
+                                                    //     if (message.text != null) {
+                                                    //         bot.sendMessage(chatID, message.text)
+                                                    //     }
+                                                    // })
+
+                                                    if (e) {
+                                                        return console.log('Error running query', e);
+                                                    }
+                                                });
+                                            });
                                     })
                                 })
                         }

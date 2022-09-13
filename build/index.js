@@ -87,7 +87,6 @@ bot.onText(/\/start/gm, (msg) => __awaiter(void 0, void 0, void 0, function* () 
             ],
         }
     });
-    console.log(msg.chat.id);
     pool.connect((err, client, done) => {
         if (err) {
             return console.log('Connection error', err);
@@ -101,6 +100,7 @@ bot.onText(/\/start/gm, (msg) => __awaiter(void 0, void 0, void 0, function* () 
         });
     });
     bot.on('callback_query', (callback_query) => __awaiter(void 0, void 0, void 0, function* () {
+        var _a, _b, _c;
         const action = callback_query.data;
         console.log(callback_query.data, callback_query.id);
         if (action === '1') {
@@ -113,21 +113,21 @@ bot.onText(/\/start/gm, (msg) => __awaiter(void 0, void 0, void 0, function* () 
             const { time, temperature_2m } = weatherData.hourly;
             const weatherIndex = time.findIndex(el => el === currentTime);
             console.log(currentTime, temperature_2m[weatherIndex]);
-            yield bot.answerCallbackQuery(callback_query.id)
-                .then(() => bot.sendMessage(msg.chat.id, `Сейчас в Оттаве (Канада) ${temperature_2m[weatherIndex]}°C`));
+            if (((_a = msg.from) === null || _a === void 0 ? void 0 : _a.id) != null) {
+                yield bot.answerCallbackQuery(callback_query.id);
+                yield bot.sendMessage((_b = msg.from) === null || _b === void 0 ? void 0 : _b.id, `Сейчас в Оттаве (Канада) ${temperature_2m[weatherIndex]}°C`);
+            }
         }
         if (action === '2') {
             const photo = 'https://pythonist.ru/wp-content/uploads/2020/03/photo_2021-02-03_10-47-04-350x2000-1.jpg';
             const caption = 'Идеальный карманный справочник для быстрого ознакомления с особенностями работы разработчиков на Python. Вы найдете море краткой информации о типах и операторах в Python, именах специальных методов, встроенных функциях, исключениях и других часто используемых стандартных модулях.';
             const file = fs.createReadStream('files/python-book.zip');
-            yield bot.answerCallbackQuery(callback_query.id)
-                .then(() => {
-                bot.sendPhoto(msg.chat.id, photo, {
-                    caption,
-                }).catch(e => console.log(e));
-                bot.sendDocument(msg.chat.id, file).catch(e => console.log(e));
+            if (((_c = msg.from) === null || _c === void 0 ? void 0 : _c.id) != null) {
+                yield bot.answerCallbackQuery(callback_query.id);
+                yield bot.sendPhoto(msg.from.id, photo, { caption });
+                yield bot.sendDocument(msg.from.id, file).catch(e => console.log(e));
                 console.log('File has been sent');
-            });
+            }
         }
         if (action === '3') {
             yield bot.answerCallbackQuery(callback_query.id)
@@ -155,9 +155,24 @@ bot.onText(/\/start/gm, (msg) => __awaiter(void 0, void 0, void 0, function* () 
                                 },
                             });
                             bot.onReplyToMessage(msg.chat.id, messageBroadcat.message_id, (message) => __awaiter(void 0, void 0, void 0, function* () {
-                                if (message.text) {
-                                    yield bot.sendMessage(msg.chat.id, message.text);
-                                }
+                                pool.connect((err, client, done) => {
+                                    if (err) {
+                                        return console.log('Connection error', err);
+                                    }
+                                    client.query({ text: `SELECT "chat_id" FROM "users"`, rowMode: 'array' }, (e, res) => {
+                                        done();
+                                        console.log(res.rows);
+                                        // res.rows.forEach(chatID => {
+                                        //
+                                        //     if (message.text != null) {
+                                        //         bot.sendMessage(chatID, message.text)
+                                        //     }
+                                        // })
+                                        if (e) {
+                                            return console.log('Error running query', e);
+                                        }
+                                    });
+                                });
                             }));
                         }));
                     }
