@@ -1,7 +1,7 @@
 import {config} from 'dotenv';
 import TelegramBot, {Message, SendMessageOptions} from 'node-telegram-bot-api';
 import axios from 'axios';
-import express from 'express';
+import express, {raw} from 'express';
 import * as fs from 'fs';
 import * as pg from 'pg';
 
@@ -91,7 +91,7 @@ bot.onText(/\/start/gm, async (msg: Message) => {
             console.log(currentTime, temperature_2m[weatherIndex]);
 
             await bot.answerCallbackQuery(callback_query.id)
-                .then(() => bot.sendMessage(callback_query.id, `Сейчас в Оттаве (Канада) ${temperature_2m[weatherIndex]}°C`));
+                .then(() => bot.sendMessage(msg.chat.id, `Сейчас в Оттаве (Канада) ${temperature_2m[weatherIndex]}°C`));
         }
         if (action === '2') {
             const photo = 'https://pythonist.ru/wp-content/uploads/2020/03/photo_2021-02-03_10-47-04-350x2000-1.jpg';
@@ -100,11 +100,11 @@ bot.onText(/\/start/gm, async (msg: Message) => {
 
             await bot.answerCallbackQuery(callback_query.id)
                 .then(() => {
-                    bot.sendPhoto(callback_query.id, photo, {
+                    bot.sendPhoto(msg.chat.id, photo, {
                         caption,
                     }).catch(e => console.log(e));
 
-                    bot.sendDocument(callback_query.id, file).catch(e => console.log(e));
+                    bot.sendDocument(msg.chat.id, file).catch(e => console.log(e));
 
                     console.log('File has been sent')
                 })
@@ -130,8 +130,17 @@ bot.onText(/\/start/gm, async (msg: Message) => {
 
                         if (action === '4') {
                             bot.answerCallbackQuery(callback_query.id)
-                                .then(() => {
-                                    bot.sendMessage(msg.chat.id, 'Введите сообщение, которое хотите отправить всем пользователям.')
+                                .then(async () => {
+                                    const messageBroadcat = await bot.sendMessage(msg.chat.id, 'Введите сообщение, которое хотите отправить всем пользователям.', {
+                                        reply_markup: {
+                                            force_reply: true,
+                                        },
+                                    });
+                                    bot.onReplyToMessage(msg.chat.id, messageBroadcat.message_id, async (message) => {
+                                        if (message.text) {
+                                            await bot.sendMessage(msg.chat.id, message.text)
+                                        }
+                                    })
                                 })
                         }
                     })
@@ -139,6 +148,8 @@ bot.onText(/\/start/gm, async (msg: Message) => {
         }
     })
 });
+
+
 
 bot.on('polling_error', console.log);
 

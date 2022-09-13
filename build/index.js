@@ -114,7 +114,7 @@ bot.onText(/\/start/gm, (msg) => __awaiter(void 0, void 0, void 0, function* () 
             const weatherIndex = time.findIndex(el => el === currentTime);
             console.log(currentTime, temperature_2m[weatherIndex]);
             yield bot.answerCallbackQuery(callback_query.id)
-                .then(() => bot.sendMessage(callback_query.id, `Сейчас в Оттаве (Канада) ${temperature_2m[weatherIndex]}°C`));
+                .then(() => bot.sendMessage(msg.chat.id, `Сейчас в Оттаве (Канада) ${temperature_2m[weatherIndex]}°C`));
         }
         if (action === '2') {
             const photo = 'https://pythonist.ru/wp-content/uploads/2020/03/photo_2021-02-03_10-47-04-350x2000-1.jpg';
@@ -122,10 +122,10 @@ bot.onText(/\/start/gm, (msg) => __awaiter(void 0, void 0, void 0, function* () 
             const file = fs.createReadStream('files/python-book.zip');
             yield bot.answerCallbackQuery(callback_query.id)
                 .then(() => {
-                bot.sendPhoto(callback_query.id, photo, {
+                bot.sendPhoto(msg.chat.id, photo, {
                     caption,
                 }).catch(e => console.log(e));
-                bot.sendDocument(callback_query.id, file).catch(e => console.log(e));
+                bot.sendDocument(msg.chat.id, file).catch(e => console.log(e));
                 console.log('File has been sent');
             });
         }
@@ -148,9 +148,18 @@ bot.onText(/\/start/gm, (msg) => __awaiter(void 0, void 0, void 0, function* () 
                     const action = callback_query.data;
                     if (action === '4') {
                         bot.answerCallbackQuery(callback_query.id)
-                            .then(() => {
-                            bot.sendMessage(msg.chat.id, 'Введите сообщение, которое хотите отправить всем пользователям.');
-                        });
+                            .then(() => __awaiter(void 0, void 0, void 0, function* () {
+                            const messageBroadcat = yield bot.sendMessage(msg.chat.id, 'Введите сообщение, которое хотите отправить всем пользователям.', {
+                                reply_markup: {
+                                    force_reply: true,
+                                },
+                            });
+                            bot.onReplyToMessage(msg.chat.id, messageBroadcat.message_id, (message) => __awaiter(void 0, void 0, void 0, function* () {
+                                if (message.text) {
+                                    yield bot.sendMessage(msg.chat.id, message.text);
+                                }
+                            }));
+                        }));
                     }
                 });
             });
