@@ -131,7 +131,7 @@ bot.on('callback_query', async (callback_query) => {
                                         bot.sendMessage(chatID[0], `Сообщение от ${message.from?.username} ${message.text}`);
                                     }
                                 });
-                                await bot.sendMessage(Number(message.from?.id), '')
+                                await bot.sendMessage(Number(message.from?.id), `Вы отправили сообщение: ${message.text}`)
                             } catch (e) {
                                 console.log(e);
                             } finally {

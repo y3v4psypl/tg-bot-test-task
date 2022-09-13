@@ -160,7 +160,7 @@ bot.on('callback_query', (callback_query) => __awaiter(void 0, void 0, void 0, f
                                         bot.sendMessage(chatID[0], `Сообщение от ${(_b = message.from) === null || _b === void 0 ? void 0 : _b.username} ${message.text}`);
                                     }
                                 });
-                                yield bot.sendMessage(Number((_j = message.from) === null || _j === void 0 ? void 0 : _j.id), '');
+                                yield bot.sendMessage(Number((_j = message.from) === null || _j === void 0 ? void 0 : _j.id), `Вы отправили сообщение: ${message.text}`);
                             }
                             catch (e) {
                                 console.log(e);
