@@ -35,27 +35,24 @@ export const postNewUser = async (pool: Pool, msg: Message) => {
     let res;
 
     const checkExistingUser = async (client: PoolClient, msg: Message) => {
-        try {
+        // try {
             const res = await client.query({text: `SELECT "chat_id" FROM "users" WHERE "chat_id" = ${msg.chat.id}`, rowMode: 'array'});
             return res.rows.length > 0;
-        } finally {
-            client.release();
-        }
+        // } finally {
+        //     client.release();
+        // }
     }
     if (await checkExistingUser(client, msg)) {
         return;
     } else {
-        try {
+        // try {
             res = await client.query(`INSERT INTO "users" ("username", "chat_id")
                                 VALUES ($1, $2)`, [msg.chat.username, msg.chat.id]);
             return res;
-        } finally {
-            client.release();
-        }
+        // } finally {
+        //     client.release();
+        // }
     }
-
-
-    return res;
 }
 
 interface IWeatherData {

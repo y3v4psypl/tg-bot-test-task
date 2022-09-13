@@ -42,27 +42,24 @@ const postNewUser = (pool, msg) => __awaiter(void 0, void 0, void 0, function* (
     const client = yield pool.connect();
     let res;
     const checkExistingUser = (client, msg) => __awaiter(void 0, void 0, void 0, function* () {
-        try {
-            const res = yield client.query({ text: `SELECT "chat_id" FROM "users" WHERE "chat_id" = ${msg.chat.id}`, rowMode: 'array' });
-            return res.rows.length > 0;
-        }
-        finally {
-            client.release();
-        }
+        // try {
+        const res = yield client.query({ text: `SELECT "chat_id" FROM "users" WHERE "chat_id" = ${msg.chat.id}`, rowMode: 'array' });
+        return res.rows.length > 0;
+        // } finally {
+        //     client.release();
+        // }
     });
     if (yield checkExistingUser(client, msg)) {
         return;
     }
     else {
-        try {
-            res = yield client.query(`INSERT INTO "users" ("username", "chat_id")
+        // try {
+        res = yield client.query(`INSERT INTO "users" ("username", "chat_id")
                                 VALUES ($1, $2)`, [msg.chat.username, msg.chat.id]);
-            return res;
-        }
-        finally {
-            client.release();
-        }
+        return res;
+        // } finally {
+        //     client.release();
+        // }
     }
-    return res;
 });
 exports.postNewUser = postNewUser;
