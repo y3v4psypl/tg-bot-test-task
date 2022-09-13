@@ -62,8 +62,10 @@ const bot = new node_telegram_bot_api_1.default(TOKEN, { polling: true });
 if (bot) {
     console.log('Bot is running');
 }
+let message;
 bot.onText(/\/start/gm, (msg) => __awaiter(void 0, void 0, void 0, function* () {
     var _a;
+    message = msg;
     bot.sendMessage(Number((_a = msg.from) === null || _a === void 0 ? void 0 : _a.id), 'Здравствуйте. Нажмите на любую интересующую Вас кнопку', {
         "reply_markup": {
             "inline_keyboard": [
@@ -100,85 +102,85 @@ bot.onText(/\/start/gm, (msg) => __awaiter(void 0, void 0, void 0, function* () 
             }
         });
     });
-    bot.on('callback_query', (callback_query) => __awaiter(void 0, void 0, void 0, function* () {
-        var _b, _c, _d, _e;
-        const action = callback_query.data;
-        console.log(callback_query.data, callback_query.id);
-        if (action === '1') {
-            const currentTime = new Date().toISOString().slice(0, -10).concat('00');
-            const url = 'https://api.open-meteo.com/v1/forecast?latitude=45.4235&longitude=-75.6979&hourly=temperature_2m';
-            let weatherData = yield (0, axios_1.default)({
-                method: 'GET',
-                url: url,
-            }).then(response => response.data);
-            const { time, temperature_2m } = weatherData.hourly;
-            const weatherIndex = time.findIndex(el => el === currentTime);
-            console.log(currentTime, temperature_2m[weatherIndex]);
-            if (((_b = msg.from) === null || _b === void 0 ? void 0 : _b.id) != null) {
-                yield bot.answerCallbackQuery(callback_query.id);
-                yield bot.sendMessage((_c = msg.from) === null || _c === void 0 ? void 0 : _c.id, `Сейчас в Оттаве (Канада) ${temperature_2m[weatherIndex]}°C`);
-            }
-        }
-        if (action === '2') {
-            const photo = 'https://pythonist.ru/wp-content/uploads/2020/03/photo_2021-02-03_10-47-04-350x2000-1.jpg';
-            const caption = 'Идеальный карманный справочник для быстрого ознакомления с особенностями работы разработчиков на Python. Вы найдете море краткой информации о типах и операторах в Python, именах специальных методов, встроенных функциях, исключениях и других часто используемых стандартных модулях.';
-            const file = fs.createReadStream('files/python-book.zip');
-            if (((_d = msg.from) === null || _d === void 0 ? void 0 : _d.id) != null) {
-                yield bot.answerCallbackQuery(callback_query.id);
-                yield bot.sendPhoto(msg.from.id, photo, { caption });
-                yield bot.sendDocument(msg.from.id, file).catch(e => console.log(e));
-                console.log('File has been sent');
-            }
-        }
-        if (action === '3') {
+}));
+bot.on('callback_query', (callback_query) => __awaiter(void 0, void 0, void 0, function* () {
+    var _b, _c, _d, _e;
+    const action = callback_query.data;
+    console.log(callback_query.data, callback_query.id);
+    if (action === '1') {
+        const currentTime = new Date().toISOString().slice(0, -10).concat('00');
+        const url = 'https://api.open-meteo.com/v1/forecast?latitude=45.4235&longitude=-75.6979&hourly=temperature_2m';
+        let weatherData = yield (0, axios_1.default)({
+            method: 'GET',
+            url: url,
+        }).then(response => response.data);
+        const { time, temperature_2m } = weatherData.hourly;
+        const weatherIndex = time.findIndex(el => el === currentTime);
+        console.log(currentTime, temperature_2m[weatherIndex]);
+        if (((_b = message.from) === null || _b === void 0 ? void 0 : _b.id) != null) {
             yield bot.answerCallbackQuery(callback_query.id);
-            yield bot.sendMessage(Number((_e = msg.from) === null || _e === void 0 ? void 0 : _e.id), 'Вы выбрали рассылку всем пользователям. Вы уверены что хотите это сделать?', {
-                "reply_markup": {
-                    "inline_keyboard": [
-                        [
-                            { text: 'Уверен(а)', callback_data: '4' }
-                        ],
-                        [
-                            { text: 'Нет', callback_data: '5' }
-                        ]
+            yield bot.sendMessage((_c = message.from) === null || _c === void 0 ? void 0 : _c.id, `Сейчас в Оттаве (Канада) ${temperature_2m[weatherIndex]}°C`);
+        }
+    }
+    if (action === '2') {
+        const photo = 'https://pythonist.ru/wp-content/uploads/2020/03/photo_2021-02-03_10-47-04-350x2000-1.jpg';
+        const caption = 'Идеальный карманный справочник для быстрого ознакомления с особенностями работы разработчиков на Python. Вы найдете море краткой информации о типах и операторах в Python, именах специальных методов, встроенных функциях, исключениях и других часто используемых стандартных модулях.';
+        const file = fs.createReadStream('files/python-book.zip');
+        if (((_d = message.from) === null || _d === void 0 ? void 0 : _d.id) != null) {
+            yield bot.answerCallbackQuery(callback_query.id);
+            yield bot.sendPhoto(message.from.id, photo, { caption });
+            yield bot.sendDocument(message.from.id, file).catch(e => console.log(e));
+            console.log('File has been sent');
+        }
+    }
+    if (action === '3') {
+        yield bot.answerCallbackQuery(callback_query.id);
+        yield bot.sendMessage(Number((_e = message.from) === null || _e === void 0 ? void 0 : _e.id), 'Вы выбрали рассылку всем пользователям. Вы уверены что хотите это сделать?', {
+            "reply_markup": {
+                "inline_keyboard": [
+                    [
+                        { text: 'Уверен(а)', callback_data: '4' }
+                    ],
+                    [
+                        { text: 'Нет', callback_data: '5' }
                     ]
-                }
-            });
-            bot.on('callback_query', (callback_query) => {
-                const action = callback_query.data;
-                if (action === '4') {
-                    bot.answerCallbackQuery(callback_query.id)
-                        .then(() => __awaiter(void 0, void 0, void 0, function* () {
-                        var _a, _b;
-                        const messageBroadcat = yield bot.sendMessage(Number((_a = msg.from) === null || _a === void 0 ? void 0 : _a.id), 'Введите сообщение, которое хотите отправить всем пользователям.', {
-                            reply_markup: {
-                                force_reply: true,
-                            },
-                        });
-                        bot.onReplyToMessage(Number((_b = msg.from) === null || _b === void 0 ? void 0 : _b.id), messageBroadcat.message_id, (message) => __awaiter(void 0, void 0, void 0, function* () {
-                            pool.connect((err, client, done) => {
-                                if (err) {
-                                    return console.log('Connection error', err);
-                                }
-                                client.query({ text: `SELECT "chat_id" FROM "users"`, rowMode: 'array' }, (e, res) => {
-                                    done();
-                                    console.log(res.rows);
-                                    res.rows.forEach(chatID => {
-                                        if (message.text != null) {
-                                            bot.sendMessage(chatID[0], message.text);
-                                        }
-                                    });
-                                    if (e) {
-                                        return console.log('Error running query', e);
+                ]
+            }
+        });
+        bot.on('callback_query', (callback_query) => {
+            const action = callback_query.data;
+            if (action === '4') {
+                bot.answerCallbackQuery(callback_query.id)
+                    .then(() => __awaiter(void 0, void 0, void 0, function* () {
+                    var _a, _b;
+                    const messageBroadcat = yield bot.sendMessage(Number((_a = message.from) === null || _a === void 0 ? void 0 : _a.id), 'Введите сообщение, которое хотите отправить всем пользователям.', {
+                        reply_markup: {
+                            force_reply: true,
+                        },
+                    });
+                    bot.onReplyToMessage(Number((_b = message.from) === null || _b === void 0 ? void 0 : _b.id), messageBroadcat.message_id, (message) => __awaiter(void 0, void 0, void 0, function* () {
+                        pool.connect((err, client, done) => {
+                            if (err) {
+                                return console.log('Connection error', err);
+                            }
+                            client.query({ text: `SELECT "chat_id" FROM "users"`, rowMode: 'array' }, (e, res) => {
+                                done();
+                                console.log(res.rows);
+                                res.rows.forEach(chatID => {
+                                    if (message.text != null) {
+                                        bot.sendMessage(chatID[0], message.text);
                                     }
                                 });
+                                if (e) {
+                                    return console.log('Error running query', e);
+                                }
                             });
-                        }));
+                        });
                     }));
-                }
-            });
-        }
-    }));
+                }));
+            }
+        });
+    }
 }));
 bot.on('polling_error', console.log);
 app.listen(process.env.PORT, () => console.log(`Server is listening on ${process.env.PORT}`));

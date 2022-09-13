@@ -29,8 +29,10 @@ const pool = new pg.Pool({
 const bot = new TelegramBot(TOKEN, { polling: true });
 if (bot) { console.log('Bot is running') }
 
+let message: Message;
 
 bot.onText(/\/start/gm, async (msg: Message) => {
+    message = msg;
     bot.sendMessage(Number(msg.from?.id), 'Здравствуйте. Нажмите на любую интересующую Вас кнопку', {
         "reply_markup": {
             "inline_keyboard": [
@@ -70,98 +72,98 @@ bot.onText(/\/start/gm, async (msg: Message) => {
             }
         });
     });
-
-    bot.on('callback_query', async (callback_query) => {
-        const action = callback_query.data;
-        console.log(callback_query.data, callback_query.id)
-
-        if (action === '1') {
-            const currentTime = new Date().toISOString().slice(0, -10).concat('00');
-            const url = 'https://api.open-meteo.com/v1/forecast?latitude=45.4235&longitude=-75.6979&hourly=temperature_2m';
-
-            let weatherData: IWeatherData = await axios({
-                method: 'GET',
-                url: url,
-            }).then(response => response.data);
-
-            const { time, temperature_2m } = weatherData.hourly;
-
-            const weatherIndex = time.findIndex(el => el === currentTime);
-            console.log(currentTime, temperature_2m[weatherIndex]);
-
-            if (msg.from?.id != null) {
-                await bot.answerCallbackQuery(callback_query.id)
-                await bot.sendMessage(msg.from?.id, `Сейчас в Оттаве (Канада) ${temperature_2m[weatherIndex]}°C`);
-            }
-        }
-
-        if (action === '2') {
-            const photo = 'https://pythonist.ru/wp-content/uploads/2020/03/photo_2021-02-03_10-47-04-350x2000-1.jpg';
-            const caption = 'Идеальный карманный справочник для быстрого ознакомления с особенностями работы разработчиков на Python. Вы найдете море краткой информации о типах и операторах в Python, именах специальных методов, встроенных функциях, исключениях и других часто используемых стандартных модулях.';
-            const file = fs.createReadStream('files/python-book.zip');
-
-            if (msg.from?.id != null) {
-                await bot.answerCallbackQuery(callback_query.id)
-                await bot.sendPhoto(msg.from.id, photo, {caption});
-                await bot.sendDocument(msg.from.id, file).catch(e => console.log(e));
-                console.log('File has been sent');
-            }
-        }
-
-        if (action === '3') {
-            await bot.answerCallbackQuery(callback_query.id)
-            await bot.sendMessage(Number(msg.from?.id), 'Вы выбрали рассылку всем пользователям. Вы уверены что хотите это сделать?', {
-                        "reply_markup": {
-                            "inline_keyboard": [
-                                [
-                                    {text: 'Уверен(а)', callback_data: '4'}
-                                ],
-                                [
-                                    {text: 'Нет', callback_data: '5'}
-                                ]
-                            ]
-                        }
-                    })
-
-                    bot.on('callback_query', (callback_query) => {
-                        const action = callback_query.data;
-
-                        if (action === '4') {
-                            bot.answerCallbackQuery(callback_query.id)
-                                .then(async () => {
-                                    const messageBroadcat = await bot.sendMessage(Number(msg.from?.id), 'Введите сообщение, которое хотите отправить всем пользователям.', {
-                                        reply_markup: {
-                                            force_reply: true,
-                                        },
-                                    });
-                                    bot.onReplyToMessage(Number(msg.from?.id), messageBroadcat.message_id, async (message) => {
-                                            pool.connect((err, client, done) => {
-                                                if (err) {
-                                                    return console.log('Connection error', err);
-                                                }
-
-                                                client.query({text: `SELECT "chat_id" FROM "users"`, rowMode: 'array'}, (e, res) => {
-                                                    done();
-                                                    console.log(res.rows);
-                                                    res.rows.forEach(chatID => {
-
-                                                        if (message.text != null) {
-                                                            bot.sendMessage(chatID[0], message.text)
-                                                        }
-                                                    })
-
-                                                    if (e) {
-                                                        return console.log('Error running query', e);
-                                                    }
-                                                });
-                                            });
-                                    })
-                                })
-                        }
-                })
-        }
-    })
 });
+
+bot.on('callback_query', async (callback_query) => {
+    const action = callback_query.data;
+    console.log(callback_query.data, callback_query.id)
+
+    if (action === '1') {
+        const currentTime = new Date().toISOString().slice(0, -10).concat('00');
+        const url = 'https://api.open-meteo.com/v1/forecast?latitude=45.4235&longitude=-75.6979&hourly=temperature_2m';
+
+        let weatherData: IWeatherData = await axios({
+            method: 'GET',
+            url: url,
+        }).then(response => response.data);
+
+        const { time, temperature_2m } = weatherData.hourly;
+
+        const weatherIndex = time.findIndex(el => el === currentTime);
+        console.log(currentTime, temperature_2m[weatherIndex]);
+
+        if (message.from?.id != null) {
+            await bot.answerCallbackQuery(callback_query.id)
+            await bot.sendMessage(message.from?.id, `Сейчас в Оттаве (Канада) ${temperature_2m[weatherIndex]}°C`);
+        }
+    }
+
+    if (action === '2') {
+        const photo = 'https://pythonist.ru/wp-content/uploads/2020/03/photo_2021-02-03_10-47-04-350x2000-1.jpg';
+        const caption = 'Идеальный карманный справочник для быстрого ознакомления с особенностями работы разработчиков на Python. Вы найдете море краткой информации о типах и операторах в Python, именах специальных методов, встроенных функциях, исключениях и других часто используемых стандартных модулях.';
+        const file = fs.createReadStream('files/python-book.zip');
+
+        if (message.from?.id != null) {
+            await bot.answerCallbackQuery(callback_query.id)
+            await bot.sendPhoto(message.from.id, photo, {caption});
+            await bot.sendDocument(message.from.id, file).catch(e => console.log(e));
+            console.log('File has been sent');
+        }
+    }
+
+    if (action === '3') {
+        await bot.answerCallbackQuery(callback_query.id)
+        await bot.sendMessage(Number(message.from?.id), 'Вы выбрали рассылку всем пользователям. Вы уверены что хотите это сделать?', {
+            "reply_markup": {
+                "inline_keyboard": [
+                    [
+                        {text: 'Уверен(а)', callback_data: '4'}
+                    ],
+                    [
+                        {text: 'Нет', callback_data: '5'}
+                    ]
+                ]
+            }
+        })
+
+        bot.on('callback_query', (callback_query) => {
+            const action = callback_query.data;
+
+            if (action === '4') {
+                bot.answerCallbackQuery(callback_query.id)
+                    .then(async () => {
+                        const messageBroadcat = await bot.sendMessage(Number(message.from?.id), 'Введите сообщение, которое хотите отправить всем пользователям.', {
+                            reply_markup: {
+                                force_reply: true,
+                            },
+                        });
+                        bot.onReplyToMessage(Number(message.from?.id), messageBroadcat.message_id, async (message) => {
+                            pool.connect((err, client, done) => {
+                                if (err) {
+                                    return console.log('Connection error', err);
+                                }
+
+                                client.query({text: `SELECT "chat_id" FROM "users"`, rowMode: 'array'}, (e, res) => {
+                                    done();
+                                    console.log(res.rows);
+                                    res.rows.forEach(chatID => {
+
+                                        if (message.text != null) {
+                                            bot.sendMessage(chatID[0], message.text)
+                                        }
+                                    })
+
+                                    if (e) {
+                                        return console.log('Error running query', e);
+                                    }
+                                });
+                            });
+                        })
+                    })
+            }
+        })
+    }
+})
 
 
 
