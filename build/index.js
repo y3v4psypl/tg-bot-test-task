@@ -62,18 +62,17 @@ const bot = new node_telegram_bot_api_1.default(TOKEN, { polling: true });
 if (bot) {
     console.log('Bot is running');
 }
-const options = {
-    //@ts-ignore
-    reply_markup: JSON.stringify({
-        inline_keyboard: [
-            [{ text: 'Погода в Канаде', callback_data: 'weather' }],
-            [{ text: 'Хочу почитать!', callback_data: 'wantToRead' }],
-            [{ text: 'Сделать рассылку', callback_data: 'mailing' }]
-        ]
-    })
-};
 bot.onText(/\/start/gm, (msg) => __awaiter(void 0, void 0, void 0, function* () {
-    bot.sendMessage(msg.chat.id, 'Здравствуйте. Нажмите на любую интересующую Вас кнопку', options);
+    bot.sendMessage(msg.chat.id, 'Здравствуйте. Нажмите на любую интересующую Вас кнопку', {
+        //@ts-ignore
+        reply_markup: {
+            inline_keyboard: [
+                [{ text: 'Погода в Канаде', callback_data: '1' }],
+                [{ text: 'Хочу почитать!', callback_data: '2' }],
+                [{ text: 'Сделать рассылку', callback_data: '3' }]
+            ]
+        }
+    });
     console.log(msg.chat.id);
     pool.connect((err, client, done) => {
         if (err) {
@@ -90,7 +89,7 @@ bot.onText(/\/start/gm, (msg) => __awaiter(void 0, void 0, void 0, function* () 
     bot.on('callback_query', (callback_query) => __awaiter(void 0, void 0, void 0, function* () {
         const action = callback_query.data;
         console.log(callback_query.data, callback_query.id);
-        if (action === 'weather') {
+        if (action === '1') {
             const currentTime = new Date().toISOString().slice(0, -10).concat('00');
             const url = 'https://api.open-meteo.com/v1/forecast?latitude=45.4235&longitude=-75.6979&hourly=temperature_2m';
             let weatherData = yield (0, axios_1.default)({

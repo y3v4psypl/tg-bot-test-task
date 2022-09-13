@@ -29,19 +29,19 @@ const pool = new pg.Pool({
 const bot = new TelegramBot(TOKEN, { polling: true });
 if (bot) { console.log('Bot is running') }
 
-const options: SendMessageOptions = {
-    //@ts-ignore
-    reply_markup: JSON.stringify({
-        inline_keyboard: [
-            [{text: 'Погода в Канаде', callback_data: 'weather'}],
-            [{text: 'Хочу почитать!', callback_data: 'wantToRead'}],
-            [{text: 'Сделать рассылку', callback_data: 'mailing'}]
-        ]
-    })
-}
 
 bot.onText(/\/start/gm, async (msg: Message) => {
-    bot.sendMessage(msg.chat.id, 'Здравствуйте. Нажмите на любую интересующую Вас кнопку', options);
+    bot.sendMessage(msg.chat.id, 'Здравствуйте. Нажмите на любую интересующую Вас кнопку', {
+        //@ts-ignore
+        reply_markup: {
+            inline_keyboard: [
+                [{text: 'Погода в Канаде', callback_data: '1'}],
+                [{text: 'Хочу почитать!', callback_data: '2'}],
+                [{text: 'Сделать рассылку', callback_data: '3'}]
+            ]
+        }
+    });
+
     console.log(msg.chat.id);
 
     pool.connect((err, client, done) => {
@@ -63,7 +63,7 @@ bot.onText(/\/start/gm, async (msg: Message) => {
         const action = callback_query.data;
         console.log(callback_query.data, callback_query.id)
 
-        if (action === 'weather') {
+        if (action === '1') {
             const currentTime = new Date().toISOString().slice(0, -10).concat('00');
             const url = 'https://api.open-meteo.com/v1/forecast?latitude=45.4235&longitude=-75.6979&hourly=temperature_2m';
 
