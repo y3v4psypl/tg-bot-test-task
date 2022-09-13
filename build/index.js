@@ -138,43 +138,43 @@ bot.on('callback_query', (callback_query) => __awaiter(void 0, void 0, void 0, f
                     ]
                 }
             });
-            bot.on('callback_query', (callback_query) => __awaiter(void 0, void 0, void 0, function* () {
-                var _f, _g, _h;
-                const action = callback_query.data;
-                switch (action) {
-                    case BroadcastingActionType.Yes:
-                        yield bot.answerCallbackQuery(callback_query.id);
-                        const messageBroadcat = yield bot.sendMessage(Number((_f = message.from) === null || _f === void 0 ? void 0 : _f.id), 'Введите сообщение, которое хотите отправить всем пользователям.', {
-                            reply_markup: {
-                                force_reply: true,
-                            },
-                        });
-                        bot.onReplyToMessage(Number((_g = message.from) === null || _g === void 0 ? void 0 : _g.id), messageBroadcat.message_id, (message) => __awaiter(void 0, void 0, void 0, function* () {
-                            var _j;
-                            const client = yield pool.connect();
-                            try {
-                                const res = yield client.query({ text: `SELECT "chat_id" FROM "users"`, rowMode: 'array' });
-                                res.rows.forEach(chatID => {
-                                    var _a, _b;
-                                    if (message.text != null && chatID[0] != Number((_a = message.from) === null || _a === void 0 ? void 0 : _a.id)) {
-                                        bot.sendMessage(chatID[0], `Сообщение от ${(_b = message.from) === null || _b === void 0 ? void 0 : _b.username} ${message.text}`);
-                                    }
-                                });
-                                yield bot.sendMessage(Number((_j = message.from) === null || _j === void 0 ? void 0 : _j.id), `Вы отправили сообщение: ${message.text}`);
-                            }
-                            catch (e) {
-                                console.log(e);
-                            }
-                            finally {
-                                client.release();
-                            }
-                        }));
-                        break;
-                    case BroadcastingActionType.No:
-                        yield bot.sendMessage(Number((_h = message.from) === null || _h === void 0 ? void 0 : _h.id), 'Вы отказались от рассылки');
+            break;
+    }
+}));
+bot.on('callback_query', (callback_query) => __awaiter(void 0, void 0, void 0, function* () {
+    var _f, _g, _h;
+    const action = callback_query.data;
+    switch (action) {
+        case BroadcastingActionType.Yes:
+            yield bot.answerCallbackQuery(callback_query.id);
+            const messageBroadcat = yield bot.sendMessage(Number((_f = message.from) === null || _f === void 0 ? void 0 : _f.id), 'Введите сообщение, которое хотите отправить всем пользователям.', {
+                reply_markup: {
+                    force_reply: true,
+                },
+            });
+            bot.onReplyToMessage(Number((_g = message.from) === null || _g === void 0 ? void 0 : _g.id), messageBroadcat.message_id, (message) => __awaiter(void 0, void 0, void 0, function* () {
+                var _j;
+                const client = yield pool.connect();
+                try {
+                    const res = yield client.query({ text: `SELECT "chat_id" FROM "users"`, rowMode: 'array' });
+                    res.rows.forEach(chatID => {
+                        var _a, _b;
+                        if (message.text != null && chatID[0] != Number((_a = message.from) === null || _a === void 0 ? void 0 : _a.id)) {
+                            bot.sendMessage(chatID[0], `Сообщение от ${(_b = message.from) === null || _b === void 0 ? void 0 : _b.username} ${message.text}`);
+                        }
+                    });
+                    yield bot.sendMessage(Number((_j = message.from) === null || _j === void 0 ? void 0 : _j.id), `Вы отправили сообщение: ${message.text}`);
+                }
+                catch (e) {
+                    console.log(e);
+                }
+                finally {
+                    client.release();
                 }
             }));
             break;
+        case BroadcastingActionType.No:
+            yield bot.sendMessage(Number((_h = message.from) === null || _h === void 0 ? void 0 : _h.id), 'Вы отказались от рассылки');
     }
 }));
 bot.on('polling_error', console.log);

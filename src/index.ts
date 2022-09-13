@@ -108,44 +108,44 @@ bot.on('callback_query', async (callback_query) => {
                     ]
                 }
             })
-
-            bot.on('callback_query', async (callback_query) => {
-                const action = callback_query.data;
-                switch (action) {
-                    case BroadcastingActionType.Yes:
-                        await bot.answerCallbackQuery(callback_query.id)
-
-                        const messageBroadcat = await bot.sendMessage(Number(message.from?.id), 'Введите сообщение, которое хотите отправить всем пользователям.', {
-                            reply_markup: {
-                                force_reply: true,
-                            },
-                        });
-                        bot.onReplyToMessage(Number(message.from?.id), messageBroadcat.message_id, async (message) => {
-                            const client = await pool.connect();
-
-                            try {
-                                const res = await client.query({text: `SELECT "chat_id" FROM "users"`, rowMode: 'array'});
-
-                                res.rows.forEach(chatID => {
-                                    if (message.text != null && chatID[0] != Number(message.from?.id)) {
-                                        bot.sendMessage(chatID[0], `Сообщение от ${message.from?.username} ${message.text}`);
-                                    }
-                                });
-                                await bot.sendMessage(Number(message.from?.id), `Вы отправили сообщение: ${message.text}`)
-                            } catch (e) {
-                                console.log(e);
-                            } finally {
-                                client.release();
-                            }
-                        });
-                    break;
-                    case BroadcastingActionType.No:
-                        await bot.sendMessage(Number(message.from?.id), 'Вы отказались от рассылки')
-                }
-
-            });
         break;
     }
+});
+
+bot.on('callback_query', async (callback_query) => {
+    const action = callback_query.data;
+    switch (action) {
+        case BroadcastingActionType.Yes:
+            await bot.answerCallbackQuery(callback_query.id)
+
+            const messageBroadcat = await bot.sendMessage(Number(message.from?.id), 'Введите сообщение, которое хотите отправить всем пользователям.', {
+                reply_markup: {
+                    force_reply: true,
+                },
+            });
+            bot.onReplyToMessage(Number(message.from?.id), messageBroadcat.message_id, async (message) => {
+                const client = await pool.connect();
+
+                try {
+                    const res = await client.query({text: `SELECT "chat_id" FROM "users"`, rowMode: 'array'});
+
+                    res.rows.forEach(chatID => {
+                        if (message.text != null && chatID[0] != Number(message.from?.id)) {
+                            bot.sendMessage(chatID[0], `Сообщение от ${message.from?.username} ${message.text}`);
+                        }
+                    });
+                    await bot.sendMessage(Number(message.from?.id), `Вы отправили сообщение: ${message.text}`)
+                } catch (e) {
+                    console.log(e);
+                } finally {
+                    client.release();
+                }
+            });
+            break;
+        case BroadcastingActionType.No:
+            await bot.sendMessage(Number(message.from?.id), 'Вы отказались от рассылки')
+    }
+
 });
 
 
