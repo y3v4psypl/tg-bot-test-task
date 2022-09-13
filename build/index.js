@@ -99,7 +99,8 @@ bot.onText(/\/start/gm, (msg) => __awaiter(void 0, void 0, void 0, function* () 
             const { time, temperature_2m } = weatherData.hourly;
             const weatherIndex = time.findIndex(el => el === currentTime);
             console.log(currentTime, temperature_2m[weatherIndex]);
-            bot.sendMessage(msg.chat.id, `Сейчас в Оттаве (Канада) ${temperature_2m[weatherIndex]}°C`);
+            yield bot.answerCallbackQuery(callback_query.id)
+                .then(() => bot.sendMessage(msg.chat.id, `Сейчас в Оттаве (Канада) ${temperature_2m[weatherIndex]}°C`));
         }
     }));
 }));
