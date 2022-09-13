@@ -60,6 +60,7 @@ bot.onText(/\/wannaread/gm, (msg) => {
         caption,
     }).catch(e => console.log(e));
     bot.sendDocument(msg.chat.id, file).catch(e => console.log(e));
+    console.log('File has been sent');
 });
 bot.onText(/\/weather/gm, (msg) => __awaiter(void 0, void 0, void 0, function* () {
     const currentTime = new Date().toISOString().slice(0, -10).concat('00');

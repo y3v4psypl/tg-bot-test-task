@@ -26,6 +26,7 @@ bot.onText(/\/wannaread/gm, (msg: Message) => {
         caption,
     }).catch(e => console.log(e))
     bot.sendDocument(msg.chat.id, file).catch(e => console.log(e));
+    console.log('File has been sent')
 });
 
 bot.onText(/\/weather/gm, async (msg: Message) => {
