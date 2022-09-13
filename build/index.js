@@ -46,7 +46,7 @@ const app = (0, express_1.default)();
 (0, dotenv_1.config)();
 let TOKEN = process.env.TELEGRAM_API_TOKEN || 'undefined';
 // postgres
-const client = new pg.Client({
+const pool = new pg.Pool({
     host: process.env.PG_HOST,
     user: process.env.PG_USER,
     database: process.env.PG_DATABASE,
@@ -56,7 +56,6 @@ const client = new pg.Client({
         rejectUnauthorized: false
     }
 });
-const pool = new pg.Pool();
 // console.log(client ? "Postgres is connected" : "Postgres connection failed");
 // create bot
 const bot = new node_telegram_bot_api_1.default(TOKEN, { polling: true });
