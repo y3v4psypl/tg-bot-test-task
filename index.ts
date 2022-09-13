@@ -58,7 +58,27 @@ bot.onText(/\/start/gm, async (msg: Message) => {
             }
         });
     });
-    bot.on('callback_query', (callback_query) => {
+
+    bot.on('callback_query', async (callback_query) => {
+        const action = callback_query.data;
+
+        if (action === 'weather') {
+            const currentTime = new Date().toISOString().slice(0, -10).concat('00');
+            const url = 'https://api.open-meteo.com/v1/forecast?latitude=45.4235&longitude=-75.6979&hourly=temperature_2m';
+
+            let weatherData: IWeatherData = await axios({
+                method: 'GET',
+                url: url,
+            }).then(response => response.data);
+
+            const { time, temperature_2m } = weatherData.hourly;
+
+            const weatherIndex = time.findIndex(el => el === currentTime);
+            console.log(currentTime, temperature_2m[weatherIndex]);
+
+            bot.sendMessage(msg.chat.id, `Сейчас в Оттаве (Канада) ${temperature_2m[weatherIndex]}°C`);
+        }
+
 
     })
 });
@@ -77,22 +97,9 @@ bot.onText(/\/wannaread/gm, (msg: Message) => {
     console.log('File has been sent')
 });
 
-bot.onText(/\/weather/gm, async (msg: Message) => {
-    const currentTime = new Date().toISOString().slice(0, -10).concat('00');
-    const url = 'https://api.open-meteo.com/v1/forecast?latitude=45.4235&longitude=-75.6979&hourly=temperature_2m';
-
-    let weatherData: IWeatherData = await axios({
-        method: 'GET',
-        url: url,
-    }).then(response => response.data);
-
-    const { time, temperature_2m } = weatherData.hourly;
-
-    const weatherIndex = time.findIndex(el => el === currentTime);
-    console.log(currentTime, temperature_2m[weatherIndex]);
-
-    bot.sendMessage(msg.chat.id, `Сейчас в Оттаве (Канада) ${temperature_2m[weatherIndex]}°C`);
-});
+// bot.onText(/\/weather/gm, async (msg: Message) => {
+//
+// });
 
 bot.on
 
