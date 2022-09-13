@@ -31,7 +31,7 @@ if (bot) { console.log('Bot is running') }
 
 
 bot.onText(/\/start/gm, async (msg: Message) => {
-    bot.sendMessage(msg.chat.id, 'Здравствуйте. Нажмите на любую интересующую Вас кнопку', {
+    bot.sendMessage(Number(msg.from?.id), 'Здравствуйте. Нажмите на любую интересующую Вас кнопку', {
         "reply_markup": {
             "inline_keyboard": [
                 [
@@ -110,8 +110,7 @@ bot.onText(/\/start/gm, async (msg: Message) => {
 
         if (action === '3') {
             await bot.answerCallbackQuery(callback_query.id)
-                .then(() => {
-                    bot.sendMessage(msg.chat.id, 'Вы выбрали рассылку всем пользователям. Вы уверены что хотите это сделать?', {
+            await bot.sendMessage(Number(msg.from?.id), 'Вы выбрали рассылку всем пользователям. Вы уверены что хотите это сделать?', {
                         "reply_markup": {
                             "inline_keyboard": [
                                 [
@@ -130,12 +129,12 @@ bot.onText(/\/start/gm, async (msg: Message) => {
                         if (action === '4') {
                             bot.answerCallbackQuery(callback_query.id)
                                 .then(async () => {
-                                    const messageBroadcat = await bot.sendMessage(msg.chat.id, 'Введите сообщение, которое хотите отправить всем пользователям.', {
+                                    const messageBroadcat = await bot.sendMessage(Number(msg.from?.id), 'Введите сообщение, которое хотите отправить всем пользователям.', {
                                         reply_markup: {
                                             force_reply: true,
                                         },
                                     });
-                                    bot.onReplyToMessage(msg.chat.id, messageBroadcat.message_id, async (message) => {
+                                    bot.onReplyToMessage(Number(msg.from?.id), messageBroadcat.message_id, async (message) => {
                                             pool.connect((err, client, done) => {
                                                 if (err) {
                                                     return console.log('Connection error', err);
@@ -144,12 +143,12 @@ bot.onText(/\/start/gm, async (msg: Message) => {
                                                 client.query({text: `SELECT "chat_id" FROM "users"`, rowMode: 'array'}, (e, res) => {
                                                     done();
                                                     console.log(res.rows);
-                                                    // res.rows.forEach(chatID => {
-                                                    //
-                                                    //     if (message.text != null) {
-                                                    //         bot.sendMessage(chatID, message.text)
-                                                    //     }
-                                                    // })
+                                                    res.rows.forEach(chatID => {
+
+                                                        if (message.text != null) {
+                                                            bot.sendMessage(chatID[0], message.text)
+                                                        }
+                                                    })
 
                                                     if (e) {
                                                         return console.log('Error running query', e);
@@ -159,7 +158,6 @@ bot.onText(/\/start/gm, async (msg: Message) => {
                                     })
                                 })
                         }
-                    })
                 })
         }
     })
