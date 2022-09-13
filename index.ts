@@ -16,6 +16,8 @@ const client = new pg.Client({
     rejectUnauthorized: false
     }
 });
+client.connect().catch(e => console.log(e));
+
 console.log(client ? "Postgres is connected" : "Postgres connection failed");
 
 // create bot

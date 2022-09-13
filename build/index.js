@@ -50,6 +50,7 @@ const client = new pg.Client({
         rejectUnauthorized: false
     }
 });
+client.connect().catch(e => console.log(e));
 console.log(client ? "Postgres is connected" : "Postgres connection failed");
 // create bot
 const bot = new node_telegram_bot_api_1.default(TOKEN, { polling: true });
