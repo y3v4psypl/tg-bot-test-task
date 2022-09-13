@@ -2,11 +2,21 @@ import {config} from 'dotenv';
 import TelegramBot, {Message} from 'node-telegram-bot-api';
 import axios from 'axios';
 import * as fs from 'fs';
+import * as pg from 'pg';
 
 // access env variables
 config();
 
 let TOKEN = process.env.TELEGRAM_API_TOKEN || 'undefined';
+
+// postgres
+const client = new pg.Client({
+    connectionString: process.env.DATABASE_URL,
+    ssl: {
+    rejectUnauthorized: false
+    }
+});
+console.log(client ? "Postgres is connected" : "Postgres connection failed");
 
 // create bot
 const bot = new TelegramBot(TOKEN, { polling: true });

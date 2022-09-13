@@ -39,9 +39,18 @@ const dotenv_1 = require("dotenv");
 const node_telegram_bot_api_1 = __importDefault(require("node-telegram-bot-api"));
 const axios_1 = __importDefault(require("axios"));
 const fs = __importStar(require("fs"));
+const pg = __importStar(require("pg"));
 // access env variables
 (0, dotenv_1.config)();
 let TOKEN = process.env.TELEGRAM_API_TOKEN || 'undefined';
+// postgres
+const client = new pg.Client({
+    connectionString: process.env.DATABASE_URL,
+    ssl: {
+        rejectUnauthorized: false
+    }
+});
+console.log(client ? "Postgres is connected" : "Postgres connection failed");
 // create bot
 const bot = new node_telegram_bot_api_1.default(TOKEN, { polling: true });
 if (bot) {
