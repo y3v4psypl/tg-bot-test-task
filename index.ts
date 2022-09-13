@@ -32,14 +32,12 @@ if (bot) { console.log('Bot is running') }
 
 bot.onText(/\/start/gm, async (msg: Message) => {
     bot.sendMessage(msg.chat.id, 'Здравствуйте. Нажмите на любую интересующую Вас кнопку', {
-        //@ts-ignore
-        reply_markup: {
-            inline_keyboard: [
-                [{text: 'Погода в Канаде', callback_data: '1'}],
-                [{text: 'Хочу почитать!', callback_data: '2'}],
-                [{text: 'Сделать рассылку', callback_data: '3'}]
-            ]
+        reply_markup:
+        {
+            //@ts-ignore
+            keyboard: [['Погода в Канаде'], ['Хочу почитать!'], ['Сделать рассылку']]
         }
+
     });
 
     console.log(msg.chat.id);
