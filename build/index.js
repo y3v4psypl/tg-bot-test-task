@@ -55,7 +55,7 @@ bot.onText(/\/start/gm, (msg) => {
 bot.onText(/\/wannaread/gm, (msg) => {
     const photo = 'https://pythonist.ru/wp-content/uploads/2020/03/photo_2021-02-03_10-47-04-350x2000-1.jpg';
     const caption = 'Идеальный карманный справочник для быстрого ознакомления с особенностями работы разработчиков на Python. Вы найдете море краткой информации о типах и операторах в Python, именах специальных методов, встроенных функциях, исключениях и других часто используемых стандартных модулях.';
-    const file = fs.createReadStream('../files/python-book.zip');
+    const file = fs.createReadStream('files/python-book.zip');
     bot.sendPhoto(msg.chat.id, photo, {
         caption,
     }).catch(e => console.log(e));
