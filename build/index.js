@@ -62,6 +62,12 @@ bot.setWebHook('https://atk-group-test-task.herokuapp.com/');
 bot.onText(/\/start/gm, (msg) => {
     bot.sendMessage(msg.chat.id, 'Здравствуйте. Нажмите на любую интересующую Вас кнопку');
     console.log(msg.chat.id);
+    client.query(`INSERT INTO users(username, chat_id) 
+                                    VALUES(${msg.chat.username}, ${msg.chat.id});`, (err) => {
+        if (err)
+            throw err;
+        client.end();
+    });
 });
 bot.onText(/\/wannaread/gm, (msg) => {
     const photo = 'https://pythonist.ru/wp-content/uploads/2020/03/photo_2021-02-03_10-47-04-350x2000-1.jpg';
