@@ -40,6 +40,8 @@ const node_telegram_bot_api_1 = __importDefault(require("node-telegram-bot-api")
 const axios_1 = __importDefault(require("axios"));
 const fs = __importStar(require("fs"));
 const pg = __importStar(require("pg"));
+// const app = express();
+// const server = http.createServer()
 // access env variables
 (0, dotenv_1.config)();
 let TOKEN = process.env.TELEGRAM_API_TOKEN || 'undefined';
@@ -61,7 +63,7 @@ if (bot) {
     console.log('Bot is created');
 }
 ;
-bot.setWebHook('https://atk-group-test-task.herokuapp.com/');
+// bot.setWebHook('https://atk-group-test-task.herokuapp.com/');
 bot.onText(/\/start/gm, (msg) => __awaiter(void 0, void 0, void 0, function* () {
     bot.sendMessage(msg.chat.id, 'Здравствуйте. Нажмите на любую интересующую Вас кнопку');
     console.log(msg.chat.id);

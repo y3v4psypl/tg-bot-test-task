@@ -1,8 +1,13 @@
 import {config} from 'dotenv';
 import TelegramBot, {Message} from 'node-telegram-bot-api';
 import axios from 'axios';
+import express from 'express';
 import * as fs from 'fs';
 import * as pg from 'pg';
+
+
+// const app = express();
+// const server = http.createServer()
 
 // access env variables
 config();
@@ -29,7 +34,7 @@ console.log(client ? "Postgres is connected" : "Postgres connection failed");
 const bot = new TelegramBot(TOKEN, { polling: true });
 if (bot) { console.log('Bot is created') };
 
-bot.setWebHook('https://atk-group-test-task.herokuapp.com/');
+// bot.setWebHook('https://atk-group-test-task.herokuapp.com/');
 
 bot.onText(/\/start/gm, async (msg: Message) => {
     bot.sendMessage(msg.chat.id, 'Здравствуйте. Нажмите на любую интересующую Вас кнопку');
@@ -43,9 +48,6 @@ bot.onText(/\/start/gm, async (msg: Message) => {
     } finally {
         await client.end();
     }
-
-
-
 });
 
 bot.onText(/\/wannaread/gm, (msg: Message) => {
@@ -76,6 +78,8 @@ bot.onText(/\/weather/gm, async (msg: Message) => {
 });
 
 bot.on('polling_error', console.log);
+
+
 
 interface IWeatherData {
     latitude: number;
