@@ -113,7 +113,7 @@ bot.on('callback_query', async (callback_query) => {
 
                 res.rows.forEach(id => {
                     if (message.text != null && id[0] != chatId) {
-                        bot.sendMessage(chatID[0], message.from?.username == undefined
+                        bot.sendMessage(id[0], message.from?.username == undefined
                             ? `Анонимное сообщение: ${message.text}`
                             : `Сообщение от ${message.from?.username}: ${message.text}`);
                     }
