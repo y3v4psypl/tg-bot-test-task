@@ -62,11 +62,9 @@ const bot = new node_telegram_bot_api_1.default(TOKEN, { polling: true });
 if (bot) {
     console.log('Bot is running');
 }
-let message;
 bot.onText(/\/start/gm, (msg) => __awaiter(void 0, void 0, void 0, function* () {
-    var _a;
-    message = msg;
-    yield bot.sendMessage(Number((_a = msg.from) === null || _a === void 0 ? void 0 : _a.id), 'Здравствуйте. Нажмите на любую интересующую Вас кнопку', {
+    yield (0, queries_1.postNewUser)(pool, msg);
+    yield bot.sendMessage(msg.chat.id, 'Здравствуйте. Нажмите на любую интересующую Вас кнопку', {
         "reply_markup": {
             "inline_keyboard": [
                 [
@@ -90,33 +88,28 @@ bot.onText(/\/start/gm, (msg) => __awaiter(void 0, void 0, void 0, function* () 
             ],
         }
     });
-    yield (0, queries_1.postNewUser)(pool, msg);
 }));
 bot.on('callback_query', (callback_query) => __awaiter(void 0, void 0, void 0, function* () {
-    var _b, _c, _d, _e;
     const action = callback_query.data;
     console.log(callback_query.data, callback_query.id);
+    const chatId = callback_query.from.id;
     switch (action) {
         case StartActionType.GetWeather:
-            if (((_b = message.from) === null || _b === void 0 ? void 0 : _b.id) != null) {
-                yield bot.answerCallbackQuery(callback_query.id);
-                yield bot.sendMessage((_c = message.from) === null || _c === void 0 ? void 0 : _c.id, `Сейчас в Оттаве (Канада) ${yield (0, queries_1.getWeather)()}°C`);
-            }
+            yield bot.answerCallbackQuery(callback_query.id);
+            yield bot.sendMessage(chatId, `Сейчас в Оттаве (Канада) ${yield (0, queries_1.getWeather)()}°C`);
             break;
         case StartActionType.PythonHandbook:
             const photo = 'https://pythonist.ru/wp-content/uploads/2020/03/photo_2021-02-03_10-47-04-350x2000-1.jpg';
             const caption = 'Идеальный карманный справочник для быстрого ознакомления с особенностями работы разработчиков на Python. Вы найдете море краткой информации о типах и операторах в Python, именах специальных методов, встроенных функциях, исключениях и других часто используемых стандартных модулях.';
             const file = fs.createReadStream('files/python-book.zip');
-            if (((_d = message.from) === null || _d === void 0 ? void 0 : _d.id) != null) {
-                yield bot.answerCallbackQuery(callback_query.id);
-                yield bot.sendPhoto(message.from.id, photo, { caption });
-                yield bot.sendDocument(message.from.id, file).catch(e => console.log(e));
-                console.log('File has been sent');
-            }
+            yield bot.answerCallbackQuery(callback_query.id);
+            yield bot.sendPhoto(chatId, photo, { caption });
+            yield bot.sendDocument(chatId, file).catch(e => console.log(e));
+            console.log('File has been sent');
             break;
         case StartActionType.Broadcasting:
             yield bot.answerCallbackQuery(callback_query.id);
-            yield bot.sendMessage(Number((_e = message.from) === null || _e === void 0 ? void 0 : _e.id), 'Вы выбрали рассылку всем пользователям. Вы уверены что хотите это сделать?', {
+            yield bot.sendMessage(chatId, 'Вы выбрали рассылку всем пользователям. Вы уверены что хотите это сделать?', {
                 "reply_markup": {
                     "inline_keyboard": [
                         [
@@ -132,32 +125,36 @@ bot.on('callback_query', (callback_query) => __awaiter(void 0, void 0, void 0, f
     }
 }));
 bot.on('callback_query', (callback_query) => __awaiter(void 0, void 0, void 0, function* () {
-    var _f, _g, _h;
-    const action = callback_query.data;
-    switch (action) {
-        case BroadcastingActionType.Yes:
-            yield bot.answerCallbackQuery(callback_query.id);
-            const messageBroadcat = yield bot.sendMessage(Number((_f = message.from) === null || _f === void 0 ? void 0 : _f.id), 'Введите сообщение, которое хотите отправить всем пользователям.', {
-                reply_markup: {
-                    force_reply: true,
-                },
-            });
-            bot.onReplyToMessage(Number((_g = message.from) === null || _g === void 0 ? void 0 : _g.id), messageBroadcat.message_id, (message) => __awaiter(void 0, void 0, void 0, function* () {
-                var _j;
-                const res = yield (0, queries_1.getAllUserIds)(pool);
-                res.rows.forEach(chatID => {
-                    var _a, _b, _c;
-                    if (message.text != null && chatID[0] != Number((_a = message.from) === null || _a === void 0 ? void 0 : _a.id)) {
-                        bot.sendMessage(chatID[0], ((_b = message.from) === null || _b === void 0 ? void 0 : _b.username) == undefined
-                            ? `Анонимное сообщение: ${message.text}`
-                            : `Сообщение от ${(_c = message.from) === null || _c === void 0 ? void 0 : _c.username} ${message.text}`);
-                    }
+    try {
+        const action = callback_query.data;
+        const chatId = callback_query.from.id;
+        switch (action) {
+            case BroadcastingActionType.Yes:
+                yield bot.answerCallbackQuery(callback_query.id);
+                const messageBroadcat = yield bot.sendMessage(chatId, 'Введите сообщение, которое хотите отправить всем пользователям.', {
+                    reply_markup: {
+                        force_reply: true,
+                    },
                 });
-                yield bot.sendMessage(Number((_j = message.from) === null || _j === void 0 ? void 0 : _j.id), `Вы отправили сообщение: ${message.text}`);
-            }));
-            break;
-        case BroadcastingActionType.No:
-            yield bot.sendMessage(Number((_h = message.from) === null || _h === void 0 ? void 0 : _h.id), 'Вы отказались от рассылки');
+                bot.onReplyToMessage(chatId, messageBroadcat.message_id, (message) => __awaiter(void 0, void 0, void 0, function* () {
+                    const res = yield (0, queries_1.getAllUserIds)(pool);
+                    res.rows.forEach(id => {
+                        var _a, _b, _c;
+                        if (message.text != null && id[0] != Number((_a = message.from) === null || _a === void 0 ? void 0 : _a.id)) {
+                            bot.sendMessage(id[0], ((_b = message.from) === null || _b === void 0 ? void 0 : _b.username) == undefined
+                                ? `Анонимное сообщение: ${message.text}`
+                                : `Сообщение от ${(_c = message.from) === null || _c === void 0 ? void 0 : _c.username} ${message.text}`);
+                        }
+                    });
+                    yield bot.sendMessage(chatId, `Вы отправили сообщение: ${message.text}`);
+                }));
+                break;
+            case BroadcastingActionType.No:
+                yield bot.sendMessage(chatId, 'Вы отказались от рассылки');
+        }
+    }
+    catch (err) {
+        console.log(err);
     }
 }));
 bot.on('polling_error', console.log);
